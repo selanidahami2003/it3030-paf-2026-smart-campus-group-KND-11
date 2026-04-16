@@ -1,0 +1,9 @@
+# Git ignore rules
+node_modules/
+client/node_modules/
+api/target/
+run.log
+*.log
+.DS_Store
+.idea/
+.vscode/
