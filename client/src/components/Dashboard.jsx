@@ -1,0 +1,126 @@
+import React, { useContext, useState, useEffect } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import api from '../services/api';
+import ResourceCard from './ResourceCard';
+import ResourceModal from './ResourceModal';
+
+const Dashboard = () => {
+    const { user } = useContext(AuthContext);
+    const [resources, setResources] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingResource, setEditingResource] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterType, setFilterType] = useState('ALL');
+
+    const fetchResources = async () => {
+        try {
+            const res = await api.get('/resources');
+            setResources(res.data);
+        } catch (err) {
+            console.error("Failed to fetch resources", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchResources();
+    }, []);
+
+    const handleSaveResource = async (formData) => {
+        try {
+            if (editingResource) {
+                await api.put(`/resources/${formData.id}`, formData);
+            } else {
+                await api.post('/resources', formData);
+            }
+            setIsModalOpen(false);
+            fetchResources();
+        } catch (err) {
+            console.error("Failed to save resource", err);
+            alert("Error saving resource");
+        }
+    };
+
+    const openEditModal = (resource) => {
+        setEditingResource(resource);
+        setIsModalOpen(true);
+    };
+
+    const openCreateModal = () => {
+        setEditingResource(null);
+        setIsModalOpen(true);
+    };
+
+
+    if (loading) return <div className="text-center mt-4">Loading catalog...</div>;
+
+    const filteredResources = resources.filter(res => {
+        const matchesSearch = res.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesType = filterType === 'ALL' || res.type === filterType;
+        return matchesSearch && matchesType;
+    });
+
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h2>Campus Directory</h2>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Browse university facilities instantly.</p>
+                </div>
+                {user?.role === 'ADMIN' && (
+                    <button className="p-btn p-btn-primary" onClick={openCreateModal}>+ Add Resource</button>
+                )}
+            </div>
+            
+            <ResourceModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                resource={editingResource} 
+                onSave={handleSaveResource} 
+            />
+
+
+            <div className="flex gap-4 mb-6">
+                <input 
+                    type="text" 
+                    className="p-input" 
+                    placeholder="Search resources..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ flex: 1 }}
+                />
+                <select 
+                    className="p-input" 
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    style={{ width: '200px' }}
+                >
+                    <option value="ALL">All Types</option>
+                    <option value="ROOM">Room</option>
+                    <option value="LAB">Lab</option>
+                    <option value="EQUIPMENT">Equipment</option>
+                </select>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                {filteredResources.map(res => (
+                    <ResourceCard 
+                        key={res.id} 
+                        resource={res} 
+                        isAdmin={user?.role === 'ADMIN'}
+                        onEdit={openEditModal}
+                    />
+                ))}
+                {resources.length === 0 && (
+                    <div className="p-card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem' }}>
+                        No physical assets or rooms found in the catalog.
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default Dashboard;
