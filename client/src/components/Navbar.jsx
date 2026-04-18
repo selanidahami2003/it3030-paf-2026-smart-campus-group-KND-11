@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Building2 } from 'lucide-react';
-
-const Navbar = () => {
-    return (
-        <header className="app-header">
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'white' }}>
-=======
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
@@ -19,7 +9,6 @@ const Navbar = () => {
     return (
         <header className="app-header">
             <Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'white' }}>
->>>>>>> c327aea (Add facilities module)
                 <div style={{ backgroundColor: 'white', borderRadius: '4px', padding: '4px' }}>
                     <Building2 size={24} color="var(--primary)" />
                 </div>
@@ -27,10 +16,6 @@ const Navbar = () => {
             </Link>
 
             <nav className="flex items-center gap-8" style={{ marginLeft: '2rem' }}>
-<<<<<<< HEAD
-                <Link to="/" className="nav-link-custom">Home</Link>
-            </nav>
-=======
                 <Link to="/dashboard" className="nav-link-custom">
                     Directory <LayoutDashboard size={18} />
                 </Link>
@@ -55,20 +40,16 @@ const Navbar = () => {
                     </div>
                 ) : (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginLeft: '0.5rem' }}>
-                        <Link to="/login" style={{ color: 'rgba(255,255,255,0.9)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500', transition: 'color 0.3s ease' }}
-                            onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
-                            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.9)'}
-                        >Sign In</Link>
+                        <Link to="/login"
+                            style={{ color: 'rgba(255,255,255,0.9)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: '500' }}
+                        >
+                            Sign In
+                        </Link>
                     </div>
                 )}
             </div>
->>>>>>> c327aea (Add facilities module)
         </header>
     );
 };
 
 export default Navbar;
-<<<<<<< HEAD
-
-=======
->>>>>>> c327aea (Add facilities module)
