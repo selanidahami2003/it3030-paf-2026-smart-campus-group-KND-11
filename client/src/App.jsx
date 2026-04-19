@@ -9,6 +9,8 @@ import Dashboard from './pages/Dashboard';
 import Notifications from './pages/Notifications';
 import AdminUsers from './pages/AdminUsers';
 import ProtectedRoute from './components/ProtectedRoute';
+import Unauthorized from './pages/Unauthorized';
+import TechnicianDashboard from './pages/TechnicianDashboard';
 import './index.css';
 
 function App() {
@@ -25,7 +27,7 @@ function App() {
             <Route 
               path="/dashboard" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TECHNICIAN']}>
                   <Dashboard />
                 </ProtectedRoute>
               } 
@@ -34,7 +36,7 @@ function App() {
             <Route 
               path="/notifications" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TECHNICIAN']}>
                   <Notifications />
                 </ProtectedRoute>
               } 
@@ -43,11 +45,22 @@ function App() {
             <Route 
               path="/admin/users" 
               element={
-                <ProtectedRoute adminOnly={true}>
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
                   <AdminUsers />
                 </ProtectedRoute>
               } 
             />
+
+            <Route 
+              path="/technician" 
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_TECHNICIAN']}>
+                  <TechnicianDashboard />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route path="/unauthorized" element={<Unauthorized />} />
 
             <Route path="*" element={<Home />} />
           </Routes>

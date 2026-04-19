@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Building2, User, LogOut, Bell, LayoutDashboard, Shield } from 'lucide-react';
+import { Building2, User, LogOut, Bell, LayoutDashboard, Shield, Wrench } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
-    const { user, isAdmin, logout } = useAuth();
+    const { user, isAdmin, isTechnician, logout } = useAuth();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -45,6 +45,12 @@ const Navbar = () => {
                             <Link to="/admin/users" style={{ color: 'white', textDecoration: 'none', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                 <Shield size={18} />
                                 Admin
+                            </Link>
+                        )}
+                        {isTechnician() && (
+                            <Link to="/technician" style={{ color: 'white', textDecoration: 'none', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <Wrench size={18} />
+                                Technician Tasks
                             </Link>
                         )}
                         <button 
