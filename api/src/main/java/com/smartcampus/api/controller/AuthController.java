@@ -77,4 +77,12 @@ public class AuthController {
 
         return ResponseEntity.ok("User registered successfully");
     }
+
+    @org.springframework.web.bind.annotation.GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(@org.springframework.security.core.annotation.AuthenticationPrincipal UserPrincipal currentUser) {
+        List<String> roles = currentUser.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new AuthResponse("", currentUser.getId(), currentUser.getName(), currentUser.getEmail(), roles));
+    }
 }

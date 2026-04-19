@@ -25,6 +25,15 @@ export const AuthProvider = ({ children }) => {
     return userData;
   };
 
+  const loginWithToken = async (token) => {
+    localStorage.setItem('token', token);
+    const response = await api.get('/auth/me');
+    const { accessToken, ...userData } = response.data;
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+    return userData;
+  };
+
   const signup = async (name, email, password) => {
     await api.post('/auth/signup', { name, email, password });
   };
@@ -43,7 +52,7 @@ export const AuthProvider = ({ children }) => {
   const isTechnician = () => hasRole('ROLE_TECHNICIAN');
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, isAdmin, isTechnician, hasRole }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithToken, signup, logout, isAdmin, isTechnician, hasRole }}>
       {!loading && children}
     </AuthContext.Provider>
   );

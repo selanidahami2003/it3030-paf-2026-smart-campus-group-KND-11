@@ -11,7 +11,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class UserPrincipal implements UserDetails {
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import java.util.Map;
+
+public class UserPrincipal implements UserDetails, OAuth2User {
     private String id;
     private String name;
     private String email;
@@ -20,6 +23,7 @@ public class UserPrincipal implements UserDetails {
     private String password;
 
     private Collection<? extends GrantedAuthority> authorities;
+    private Map<String, Object> attributes;
 
     public UserPrincipal(String id, String name, String email, String password, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
@@ -27,6 +31,21 @@ public class UserPrincipal implements UserDetails {
         this.email = email;
         this.password = password;
         this.authorities = authorities;
+    }
+
+    public static UserPrincipal create(User user, Map<String, Object> attributes) {
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+        userPrincipal.setAttributes(attributes);
+        return userPrincipal;
+    }
+
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
     }
 
     public static UserPrincipal create(User user) {

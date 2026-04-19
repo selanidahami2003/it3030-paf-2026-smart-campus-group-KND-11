@@ -59,6 +59,31 @@ const Login = () => {
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
+        <div className="oauth-divider" style={{ margin: '20px 0', textAlign: 'center', color: '#666' }}>
+          <span>OR</span>
+        </div>
+        <button 
+          className="google-button" 
+          onClick={() => window.location.href = 'http://localhost:8080/oauth2/authorize/google'}
+          style={{
+            width: '100%',
+            padding: '10px',
+            backgroundColor: '#ffffff',
+            color: '#757575',
+            border: '1px solid #ddd',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '10px',
+            fontWeight: 'bold',
+            marginBottom: '20px'
+          }}
+        >
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" width="20" />
+          Continue with Google
+        </button>
         <div className="auth-links">
           Don't have an account? <Link to="/signup">Sign up</Link>
         </div>

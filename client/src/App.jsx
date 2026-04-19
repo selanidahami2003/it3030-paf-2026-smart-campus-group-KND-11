@@ -11,6 +11,7 @@ import AdminUsers from './pages/AdminUsers';
 import ProtectedRoute from './components/ProtectedRoute';
 import Unauthorized from './pages/Unauthorized';
 import TechnicianDashboard from './pages/TechnicianDashboard';
+import OAuth2RedirectHandler from './pages/OAuth2RedirectHandler';
 import './index.css';
 
 function App() {
@@ -61,6 +62,7 @@ function App() {
             />
 
             <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
 
             <Route path="*" element={<Home />} />
           </Routes>
