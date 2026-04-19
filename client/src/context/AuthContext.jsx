@@ -1,42 +1,100 @@
 import React, { createContext, useState, useEffect } from 'react';
+import api from '../services/api';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    // null = identity not set yet (will show identity form)
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+  // null = no identified/logged user yet
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // Restore session from localStorage if available
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+
+        // restore session if either:
+        // 1) full auth token exists
+        // 2) identity-form student user exists
+        if (token || parsedUser?.studentId) {
+          setUser(parsedUser);
         }
-        setLoading(false);
-    }, []);
-
-    // Called when user fills in the identity form
-    const identify = (name, studentId) => {
-        const newUser = {
-            id: "2",
-            name: name,
-            studentId: studentId,
-            email: "user@smartcampus.edu",
-            role: "USER"
-        };
-        localStorage.setItem('user', JSON.stringify(newUser));
-        setUser(newUser);
-    };
-
-    const logout = () => {
+      } catch (error) {
+        console.error('Failed to parse stored user', error);
         localStorage.removeItem('user');
-        setUser(null);
+      }
+    }
+
+    setLoading(false);
+  }, []);
+
+  // Called when user fills the identity form
+  const identify = (name, studentId) => {
+    const newUser = {
+      id: '2',
+      name,
+      studentId,
+      email: 'user@smartcampus.edu',
+      role: 'USER',
     };
 
-    return (
-        <AuthContext.Provider value={{ user, identify, logout, loading }}>
-            {children}
-        </AuthContext.Provider>
-    );
+    localStorage.setItem('user', JSON.stringify(newUser));
+    setUser(newUser);
+  };
+
+  const login = async (email, password) => {
+    try {
+      const res = await api.post('/auth/login', { email, password });
+      const { accessToken, user: userData } = res.data;
+
+      localStorage.setItem('token', accessToken);
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+
+      return true;
+    } catch (error) {
+      console.error('Login failed', error);
+      throw error;
+    }
+  };
+
+  const googleLogin = async (credential) => {
+    // Mock Google login for assignment/demo flow
+    const mockUser = {
+      id: `g-${Math.random().toString(36).substr(2, 9)}`,
+      name: 'Google Student',
+      email: 'student@smartcampus.edu',
+      role: 'USER',
+    };
+
+    localStorage.setItem('token', credential || 'mock-google-token');
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    setUser(mockUser);
+
+    return true;
+  };
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        identify,
+        login,
+        googleLogin,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
