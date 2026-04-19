@@ -17,12 +17,14 @@ public class Notification {
     private String id;
     private String userId;
     private String message;
+    private String type;
     private boolean isRead = false;
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public Notification(String userId, String message) {
+    public Notification(String userId, String message, String type) {
         this.userId = userId;
         this.message = message;
+        this.type = type;
         this.createdAt = LocalDateTime.now();
         this.isRead = false;
     }
