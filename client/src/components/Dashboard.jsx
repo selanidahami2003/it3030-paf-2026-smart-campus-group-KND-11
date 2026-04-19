@@ -54,6 +54,18 @@ const Dashboard = () => {
     };
 
 
+    const handleDeleteResource = async (id) => {
+        if (window.confirm("Are you sure you want to delete this resource?")) {
+            try {
+                await api.delete(`/resources/${id}`);
+                fetchResources();
+            } catch (err) {
+                console.error("Failed to delete resource", err);
+                alert("Error deleting resource");
+            }
+        }
+    };
+
     if (loading) return <div className="text-center mt-4">Loading catalog...</div>;
 
     const filteredResources = resources.filter(res => {
@@ -111,6 +123,7 @@ const Dashboard = () => {
                         resource={res} 
                         isAdmin={user?.role === 'ADMIN'}
                         onEdit={openEditModal}
+                        onDelete={handleDeleteResource}
                     />
                 ))}
                 {resources.length === 0 && (

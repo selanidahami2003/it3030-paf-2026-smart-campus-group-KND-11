@@ -1,7 +1,7 @@
 import React from 'react';
-import { Calendar, Monitor, MapPin, Users, Building2 } from 'lucide-react';
+import { Calendar, Monitor, MapPin, Users, Building2, Trash2 } from 'lucide-react';
 
-const ResourceCard = ({ resource, onEdit, isAdmin }) => {
+const ResourceCard = ({ resource, onEdit, onDelete, isAdmin }) => {
     const getPatternImage = (res) => {
         if (res.imageUrl && res.imageUrl.trim() !== '') return res.imageUrl;
         if (res.type === 'ROOM') return '/images/lecture.png';
@@ -40,9 +40,18 @@ const ResourceCard = ({ resource, onEdit, isAdmin }) => {
 
                 <div className="flex gap-2" style={{ marginTop: 'auto' }}>
                     {isAdmin && (
-                        <button className="p-btn p-btn-secondary w-full" onClick={() => onEdit(resource)}>
-                            Edit Resource
-                        </button>
+                        <>
+                            <button className="p-btn p-btn-secondary w-full" onClick={() => onEdit(resource)}>
+                                Edit
+                            </button>
+                            <button 
+                                className="p-btn" 
+                                style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca' }} 
+                                onClick={() => onDelete(resource.id)}
+                            >
+                                <Trash2 size={18} />
+                            </button>
+                        </>
                     )}
                 </div>
             </div>
