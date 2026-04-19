@@ -51,15 +51,22 @@ body {
 .app-header {
   background-color: var(--header-bg);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 1rem 3rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding: 1rem 0;
   position: sticky;
   top: 0;
   z-index: 100;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+}
+
+.nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
 }
 
 .nav-link-custom {
@@ -193,4 +200,6 @@ p {
 .gap-4 { gap: 1rem; }
 .mt-4 { margin-top: 1rem; }
 .mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.mb-8 { margin-bottom: 2rem; }
 .w-full { width: 100%; }
