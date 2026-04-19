@@ -1,22 +1,56 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, AuthContext } from './context/AuthContext';
 import Navbar from './components/Navbar';
-import Home from './components/Home';
+import Tickets from './components/Tickets';
+import UserIdentityForm from './components/UserIdentityForm';
 import './index.css';
 
+function AppRoutes() {
+    const { user, loading, identify } = useContext(AuthContext);
+
+    if (loading) {
+        return (
+            <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                minHeight: '100vh', fontSize: '1rem', color: 'var(--text-secondary)'
+            }}>
+                Loading...
+            </div>
+        );
+    }
+
+    // Show identity form if user hasn't identified themselves yet
+    if (!user) {
+        return (
+            <UserIdentityForm
+                onIdentified={({ name, studentId }) => identify(name, studentId)}
+            />
+        );
+    }
+
+    return (
+        <div className="app-container">
+            <Navbar />
+            <main className="app-main">
+                <Routes>
+                    <Route path="/tickets" element={<Tickets />} />
+                    <Route path="/" element={<Navigate to="/tickets" replace />} />
+                    <Route path="*" element={<Navigate to="/tickets" replace />} />
+                </Routes>
+            </main>
+        </div>
+    );
+}
+
 function App() {
-  return (
-    <BrowserRouter>
-      <div className="app-container">
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="*" element={<Home />} />
-        </Routes>
-      </div>
-    </BrowserRouter>
-  );
+    return (
+        <AuthProvider>
+            <BrowserRouter>
+                <AppRoutes />
+            </BrowserRouter>
+        </AuthProvider>
+    );
 }
 
 export default App;
-
