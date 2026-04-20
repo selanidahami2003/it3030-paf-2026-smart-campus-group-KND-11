@@ -1,0 +1,41 @@
+package com.smartcampus.api.controller;
+
+import com.smartcampus.api.model.Notification;
+import com.smartcampus.api.service.NotificationService;
+import com.smartcampus.api.security.UserPrincipal;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/notifications")
+@RequiredArgsConstructor
+public class NotificationController {
+    private final NotificationService notificationService;
+
+    @GetMapping
+    public List<Notification> getMyNotifications(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return notificationService.getUserNotifications(userPrincipal.getId());
+    }
+
+    @GetMapping("/unread-count")
+    public Map<String, Long> getUnreadCount(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return Map.of("count", notificationService.getUnreadCount(userPrincipal.getId()));
+    }
+
+    @PutMapping("/{id}/read")
+    public ResponseEntity<?> markAsRead(@PathVariable String id) {
+        notificationService.markAsRead(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/read-all")
+    public ResponseEntity<?> markAllAsRead(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        notificationService.markAllAsRead(userPrincipal.getId());
+        return ResponseEntity.ok().build();
+    }
+}

@@ -18,6 +18,7 @@ public class TicketService {
     @Autowired private TicketRepository ticketRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private CommentRepository commentRepository;
+    @Autowired private NotificationService notificationService;
 
     public List<TicketSummaryDTO> getAllTickets() {
         return ticketRepository.findAllByOrderByCreatedAtDesc()
@@ -69,7 +70,17 @@ public class TicketService {
                     .orElseThrow(() -> new RuntimeException("Assignee not found"));
             ticket.setAssignee(assignee);
         }
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+
+        // Trigger Notification for Status Change
+        notificationService.createNotification(
+            ticket.getCreator().getId(),
+            "Your ticket status has been updated to " + status,
+            "TICKET_STATUS",
+            ticket.getId()
+        );
+
+        return saved;
     }
 
     public Comment addComment(String ticketId, String userId, String content) {
@@ -84,6 +95,27 @@ public class TicketService {
         comment.setContent(content);
         comment.setCreatedAt(LocalDateTime.now());
         Comment saved = commentRepository.save(comment);
+
+        // Notify creator if the commenter is not the creator
+        if (!ticket.getCreator().getId().equals(userId)) {
+            notificationService.createNotification(
+                ticket.getCreator().getId(),
+                "New comment on your ticket from " + author.getName(),
+                "NEW_COMMENT",
+                ticket.getId()
+            );
+        }
+        
+        // Notify assignee if there is one and they are not the commenter
+        if (ticket.getAssignee() != null && !ticket.getAssignee().getId().equals(userId)) {
+             notificationService.createNotification(
+                ticket.getAssignee().getId(),
+                "New comment on assigned ticket from " + author.getName(),
+                "NEW_COMMENT",
+                ticket.getId()
+            );
+        }
+
         return saved;
     }
 
