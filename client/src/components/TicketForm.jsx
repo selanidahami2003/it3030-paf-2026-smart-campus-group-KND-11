@@ -1,10 +1,21 @@
-// test change
 import React, { useState, useContext } from 'react';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
+import { 
+    X, 
+    AlertCircle, 
+    Phone, 
+    Mail, 
+    Camera, 
+    Type, 
+    FileText, 
+    Loader2,
+    ShieldAlert
+} from 'lucide-react';
 
 const TicketForm = ({ isOpen, onClose, onSuccess }) => {
     const { user } = useContext(AuthContext);
+    const [submitting, setSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         category: 'HARDWARE', description: '', contactDetails: '', priority: 'LOW'
     });
@@ -23,25 +34,26 @@ const TicketForm = ({ isOpen, onClose, onSuccess }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSubmitting(true);
 
         const phoneRegex = /^\d{10}$/;
         const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
 
         if (contactType === 'phone') {
             if (!phoneRegex.test(formData.contactDetails)) {
-                setContactError('Phone number must be exactly 10 digits (e.g., 0712345678).');
+                setContactError('Phone number must be exactly 10 digits.');
+                setSubmitting(false);
                 return;
             }
         } else {
             if (!gmailRegex.test(formData.contactDetails)) {
-                setContactError('Please enter a valid Gmail address (e.g., name@gmail.com).');
+                setContactError('Please enter a valid Gmail address.');
+                setSubmitting(false);
                 return;
             }
         }
-        setContactError('');
 
         try {
-            // Convert each selected photo to base64 data URL
             const toBase64 = (file) => new Promise((resolve, reject) => {
                 if (!file) return resolve(null);
                 const reader = new FileReader();
@@ -69,6 +81,8 @@ const TicketForm = ({ isOpen, onClose, onSuccess }) => {
         } catch (err) {
             console.error(err);
             alert('Failed to submit ticket');
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -83,180 +97,131 @@ const TicketForm = ({ isOpen, onClose, onSuccess }) => {
     return (
         <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
-            alignItems: 'flex-start', justifyContent: 'center', zIndex: 1000,
-            backdropFilter: 'blur(4px)', paddingTop: '80px', overflowY: 'auto'
+            backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex',
+            alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+            backdropFilter: 'blur(8px)', padding: '20px', overflowY: 'auto'
         }}>
-            <div className="p-card" style={{ width: '450px', maxWidth: '90%' }}>
-                <h2 className="mb-4">Report an Incident</h2>
+            <div className="p-card" style={{ width: '550px', maxWidth: '100%', position: 'relative', overflow: 'hidden' }}>
+                <button onClick={onClose} style={{ position: 'absolute', right: '1.5rem', top: '1.5rem', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer' }}>
+                    <X size={20} />
+                </button>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                    <div style={{ width: '48px', height: '48px', background: 'rgba(31, 122, 90, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                        <ShieldAlert size={24} />
+                    </div>
+                    <div>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0 }}>Report an Incident</h2>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>Provide details about the issue you encountered.</p>
+                    </div>
+                </div>
+
                 <form onSubmit={handleSubmit}>
-                    <div className="mb-4 flex gap-4">
-                        <div className="w-full">
-                            <label className="p-label">Category</label>
-                            <select className="p-input" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
-                                <option value="HARDWARE">Hardware Issue</option>
-                                <option value="SOFTWARE">Software Issue</option>
-                                <option value="NETWORK">Network Issue</option>
-                                <option value="FACILITY">Facility Damage</option>
-                            </select>
+                    <div className="flex gap-4 mb-4">
+                        <div style={{ flex: 1 }}>
+                            <label className="p-label">Issue Category</label>
+                            <div className="floating-group">
+                                <AlertCircle className="input-icon-left" size={18} />
+                                <select className="p-input p-input-with-icon" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
+                                    <option value="HARDWARE">Hardware</option>
+                                    <option value="SOFTWARE">Software</option>
+                                    <option value="NETWORK">Network</option>
+                                    <option value="FACILITY">Facility</option>
+                                </select>
+                            </div>
                         </div>
-                        <div className="w-full">
-                            <label className="p-label">Priority</label>
-                            <select className="p-input" value={formData.priority} onChange={e => setFormData({...formData, priority: e.target.value})}>
-                                <option value="LOW">Low</option>
-                                <option value="MEDIUM">Medium</option>
-                                <option value="HIGH">High</option>
-                                <option value="URGENT">Urgent</option>
-                            </select>
+                        <div style={{ flex: 1 }}>
+                            <label className="p-label">System Priority</label>
+                            <div className="floating-group">
+                                <ShieldAlert className="input-icon-left" size={18} />
+                                <select className="p-input p-input-with-icon" value={formData.priority} onChange={e => setFormData({...formData, priority: e.target.value})}>
+                                    <option value="LOW">Low</option>
+                                    <option value="MEDIUM">Medium</option>
+                                    <option value="HIGH">High</option>
+                                    <option value="URGENT">Urgent</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="mb-4">
-                        <label className="p-label">Description</label>
-                        <textarea className="p-input" rows="4" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} required placeholder="Describe the issue in detail..."></textarea>
+                    <div className="mb-6">
+                        <label className="p-label">Incident Description</label>
+                        <div className="floating-group">
+                            <FileText className="input-icon-left" size={18} style={{ top: '1.5rem', transform: 'none' }} />
+                            <textarea 
+                                className="p-input p-input-with-icon" 
+                                rows="3" 
+                                value={formData.description} 
+                                onChange={e => setFormData({...formData, description: e.target.value})} 
+                                required 
+                                placeholder="E.g. The projector in Lab A is not powering on..."
+                                style={{ minHeight: '100px' }}
+                            ></textarea>
+                        </div>
                     </div>
 
-                    <div className="mb-4">
-                        <label className="p-label">Contact Details</label>
-                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                            <button
-                                type="button"
-                                onClick={() => { setContactType('phone'); setFormData({...formData, contactDetails: ''}); setContactError(''); }}
-                                style={{
-                                    flex: 1, padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', transition: 'all 0.2s',
-                                    background: contactType === 'phone' ? 'var(--primary)' : 'transparent',
-                                    color: contactType === 'phone' ? 'white' : 'var(--text-secondary)',
-                                    border: contactType === 'phone' ? '1px solid var(--primary)' : '1px solid var(--border-color)'
-                                }}
-                            >📞 Phone</button>
-                            <button
-                                type="button"
-                                onClick={() => { setContactType('email'); setFormData({...formData, contactDetails: ''}); setContactError(''); }}
-                                style={{
-                                    flex: 1, padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', transition: 'all 0.2s',
-                                    background: contactType === 'email' ? 'var(--primary)' : 'transparent',
-                                    color: contactType === 'email' ? 'white' : 'var(--text-secondary)',
-                                    border: contactType === 'email' ? '1px solid var(--primary)' : '1px solid var(--border-color)'
-                                }}
-                            >✉️ Gmail</button>
+                    <div className="mb-6">
+                        <label className="p-label">How should we contact you?</label>
+                        <div className="segmented-control">
+                            <div className={`segmented-option ${contactType === 'phone' ? 'active' : ''}`} onClick={() => { setContactType('phone'); setFormData({...formData, contactDetails: ''}); setContactError(''); }}>
+                                <Phone size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> Phone
+                            </div>
+                            <div className={`segmented-option ${contactType === 'email' ? 'active' : ''}`} onClick={() => { setContactType('email'); setFormData({...formData, contactDetails: ''}); setContactError(''); }}>
+                                <Mail size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> Gmail
+                            </div>
                         </div>
 
-                        {contactType === 'phone' ? (
+                        <div className="floating-group">
+                            {contactType === 'phone' ? <Phone className="input-icon-left" size={18} /> : <Mail className="input-icon-left" size={18} />}
                             <input
-                                type="text"
-                                className="p-input"
+                                type={contactType === 'phone' ? 'text' : 'email'}
+                                className="p-input p-input-with-icon"
                                 value={formData.contactDetails}
                                 onChange={e => {
-                                    const value = e.target.value.replace(/\D/g, '');
-                                    if (value.length <= 10) {
-                                        setFormData({...formData, contactDetails: value});
-                                        setContactError(value.length > 0 && value.length < 10 ? 'Phone number must be exactly 10 digits.' : '');
-                                    }
-                                }}
-                                required
-                                placeholder="10-digit phone number (e.g., 0712345678)"
-                                maxLength={10}
-                            />
-                        ) : (
-                            <input
-                                type="email"
-                                className="p-input"
-                                value={formData.contactDetails}
-                                onChange={e => {
-                                    const value = e.target.value;
+                                    const value = contactType === 'phone' ? e.target.value.replace(/\D/g, '') : e.target.value;
+                                    if (contactType === 'phone' && value.length > 10) return;
                                     setFormData({...formData, contactDetails: value});
-                                    if (value && !value.endsWith('@gmail.com')) {
-                                        setContactError('Only Gmail addresses are allowed (e.g., name@gmail.com).');
-                                    } else {
-                                        setContactError('');
-                                    }
+                                    setContactError('');
                                 }}
                                 required
-                                placeholder="yourname@gmail.com"
+                                placeholder={contactType === 'phone' ? '10-digit number (e.g. 0712345678)' : 'your.name@gmail.com'}
                             />
-                        )}
-                        {contactError && (
-                            <small style={{ color: 'var(--danger)', marginTop: '4px', display: 'block' }}>{contactError}</small>
-                        )}
+                        </div>
+                        {contactError && <p style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '0.5rem', fontWeight: '500' }}>{contactError}</p>}
                     </div>
 
                     <div className="mb-4">
-                        <label className="p-label">Evidence (Photos - Max 3)</label>
-                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                            {[0, 1, 2].map((index) => (
-                                <div key={index} style={{ flex: 1 }}>
-                                    <input
-                                        id={`photo-upload-${index}`}
-                                        type="file"
-                                        accept="image/*"
-                                        style={{ display: 'none' }}
-                                        onChange={(e) => {
-                                            const file = e.target.files[0];
-                                            if (file) setFileAtIndex(index, file);
-                                            e.target.value = '';
-                                        }}
-                                    />
-                                    <div
-                                        onClick={() => document.getElementById(`photo-upload-${index}`).click()}
-                                        style={{
-                                            width: '100%',
-                                            height: '90px',
-                                            borderRadius: '8px',
-                                            border: files[index] ? '2px solid var(--primary)' : '2px dashed var(--border-color)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            cursor: 'pointer',
-                                            overflow: 'hidden',
-                                            background: 'var(--bg-color)',
-                                            position: 'relative',
-                                            transition: 'border-color 0.2s'
-                                        }}
-                                        onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                                        onMouseLeave={e => e.currentTarget.style.borderColor = files[index] ? 'var(--primary)' : 'var(--border-color)'}
+                        <label className="p-label">Evidence Photos (Max 3)</label>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            {[0, 1, 2].map((i) => (
+                                <div key={i} style={{ flex: 1 }}>
+                                    <input id={`f-${i}`} type="file" style={{ display: 'none' }} accept="image/*" onChange={(e) => setFileAtIndex(i, e.target.files[0])} />
+                                    <div 
+                                        onClick={() => document.getElementById(`f-${i}`).click()}
+                                        className="ticket-card-modern"
+                                        style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-color-light)', borderStyle: 'dashed' }}
                                     >
-                                        {files[index] ? (
-                                            <>
-                                                <img
-                                                    src={URL.createObjectURL(files[index])}
-                                                    alt={`preview-${index}`}
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setFileAtIndex(index, undefined);
-                                                    }}
-                                                    style={{
-                                                        position: 'absolute', top: '4px', right: '4px',
-                                                        background: 'rgba(0,0,0,0.6)', color: 'white',
-                                                        border: 'none', borderRadius: '50%',
-                                                        width: '20px', height: '20px',
-                                                        cursor: 'pointer', fontSize: '12px',
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                        fontWeight: 'bold'
-                                                    }}
-                                                >✕</button>
-                                            </>
-                                        ) : (
-                                            <div style={{ textAlign: 'center', color: 'var(--text-secondary)', pointerEvents: 'none' }}>
-                                                <div style={{ fontSize: '1.5rem' }}>📷</div>
-                                                <div style={{ fontSize: '0.7rem', marginTop: '2px' }}>Photo {index + 1}</div>
+                                        {files[i] ? (
+                                            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                                <img src={URL.createObjectURL(files[i])} alt="p" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                <button type="button" onClick={(e) => { e.stopPropagation(); setFileAtIndex(i, undefined); }} style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: '18px', height: '18px', fontSize: '10px' }}>✕</button>
                                             </div>
+                                        ) : (
+                                            <Camera size={20} color="var(--text-tertiary)" />
                                         )}
                                     </div>
                                 </div>
                             ))}
                         </div>
-                        <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '0.4rem' }}>
-                            Click each slot to add a photo (optional)
-                        </small>
                     </div>
 
-                    <div className="flex justify-between gap-4 mt-4">
-                        <button type="button" className="p-btn p-btn-secondary w-full" onClick={() => { resetForm(); onClose(); }}>Cancel</button>
-                        <button type="submit" className="p-btn p-btn-primary w-full">Submit Ticket</button>
+                    <div className="flex gap-4 mt-8">
+                        <button type="button" className="p-btn" style={{ flex: 1, background: 'var(--surface-color-light)', color: 'var(--text-secondary)' }} onClick={onClose}>
+                            Cancel
+                        </button>
+                        <button type="submit" className="p-btn p-btn-primary" style={{ flex: 2, gap: '0.75rem' }} disabled={submitting}>
+                            {submitting ? <Loader2 className="spinner" size={20} /> : 'Submit Ticket'}
+                        </button>
                     </div>
                 </form>
             </div>
