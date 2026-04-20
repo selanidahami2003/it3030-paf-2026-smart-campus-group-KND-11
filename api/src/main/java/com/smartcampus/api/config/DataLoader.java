@@ -1,8 +1,11 @@
 package com.smartcampus.api.config;
 
-import com.smartcampus.api.model.Resource;
 import com.smartcampus.api.model.Role;
 import com.smartcampus.api.model.User;
+import com.smartcampus.api.repository.CommentRepository;
+import com.smartcampus.api.repository.TicketRepository;
+import com.smartcampus.api.model.Resource;
+
 import com.smartcampus.api.repository.ResourceRepository;
 import com.smartcampus.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,8 @@ import org.springframework.stereotype.Component;
 public class DataLoader implements CommandLineRunner {
 
     @Autowired private UserRepository userRepository;
+    @Autowired private TicketRepository ticketRepository;
+    @Autowired private CommentRepository commentRepository;
     @Autowired private ResourceRepository resourceRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 

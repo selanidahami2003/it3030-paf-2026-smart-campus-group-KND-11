@@ -4,54 +4,69 @@ import { Calendar, Monitor, MapPin, Users, Building2, Trash2 } from 'lucide-reac
 const ResourceCard = ({ resource, onEdit, onDelete, isAdmin }) => {
     const getPatternImage = (res) => {
         if (res.imageUrl && res.imageUrl.trim() !== '') return res.imageUrl;
-        if (res.type === 'ROOM') return '/images/lecture.png';
-        if (res.type === 'LAB') return '/images/tech.png';
-        return '/images/library.png';
+        if (res.type === 'ROOM') return 'https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&q=80&w=800';
+        if (res.type === 'LAB') return 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&q=80&w=800';
+        return 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800';
     };
 
     return (
-        <div className="p-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '0', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-            <div style={{ height: '180px', width: '100%', backgroundImage: `url(${getPatternImage(resource)})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#e2e8f0', borderBottom: '1px solid var(--border-color)' }} />
-
-            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                <div className="flex justify-between items-center mb-4">
-                    <h3 style={{ fontSize: '1.125rem', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                        {resource.name}
-                    </h3>
-                    <span style={{
-                        fontSize: '0.75rem', padding: '2px 8px', borderRadius: '12px',
-                        backgroundColor: resource.status === 'ACTIVE' ? 'var(--success)' : 'var(--danger)',
-                        color: 'white', fontWeight: 'bold'
-                    }}>
-                        {resource.status}
-                    </span>
+        <div className="resource-card-premium">
+            <div className="resource-card-image-container">
+                <img 
+                    src={getPatternImage(resource)} 
+                    alt={resource.name} 
+                    className="resource-card-image"
+                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800'; }}
+                />
+                <div className="image-overlay" />
+                <span className={`status-badge-modern ${resource.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'}`}>
+                    {resource.status}
+                </span>
+            </div>
+            
+            <div className="resource-details">
+                <h3 className="resource-title">{resource.name}</h3>
+                
+                <div className="info-row">
+                    <MapPin size={16} strokeWidth={2.5} color="var(--primary)"/> 
+                    <span>{resource.location}</span>
+                </div>
+                
+                <div className="info-row">
+                    <Users size={16} strokeWidth={2.5} color="var(--primary)"/> 
+                    <span>Capacity: {resource.capacity || 'N/A'}</span>
                 </div>
 
-                <div style={{ flex: 1, marginBottom: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-                    <p style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}><MapPin size={16} color="var(--primary)" /> {resource.location}</p>
-                    <p style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}><Users size={16} color="var(--primary)" /> Capacity: {resource.capacity || 'N/A'}</p>
-                    <p style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        {resource.type === 'ROOM' ? <Building2 size={16} color="var(--primary)" /> :
-                            resource.type === 'LAB' ? <Monitor size={16} color="var(--primary)" /> :
-                                <Calendar size={16} color="var(--primary)" />}
-                        Type: {resource.type}
-                    </p>
-                </div>
+                <div className="flex items-center justify-between mt-4">
+                    <div className="type-tag">
+                        {resource.type === 'ROOM' ? <Building2 size={14} /> : 
+                         resource.type === 'LAB' ? <Monitor size={14} /> : 
+                         <Calendar size={14} />}
+                        {resource.type}
+                    </div>
 
-                <div className="flex gap-2" style={{ marginTop: 'auto' }}>
                     {isAdmin && (
-                        <>
-                            <button className="p-btn p-btn-secondary w-full" onClick={() => onEdit(resource)}>
+                        <div className="flex gap-2">
+                            <button 
+                                className="p-btn p-btn-secondary" 
+                                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                                onClick={() => onEdit(resource)}
+                            >
                                 Edit
                             </button>
-                            <button
-                                className="p-btn"
-                                style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca' }}
+                            <button 
+                                className="p-btn" 
+                                style={{ 
+                                    padding: '0.4rem', 
+                                    backgroundColor: '#fee2e2', 
+                                    color: '#dc2626', 
+                                    border: '1px solid #fecaca' 
+                                }} 
                                 onClick={() => onDelete(resource.id)}
                             >
-                                <Trash2 size={18} />
+                                <Trash2 size={16} />
                             </button>
-                        </>
+                        </div>
                     )}
                 </div>
             </div>

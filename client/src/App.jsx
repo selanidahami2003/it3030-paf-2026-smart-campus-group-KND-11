@@ -5,11 +5,13 @@ import { AuthProvider, AuthContext } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
+import Tickets from './components/Tickets';
+import UserIdentityForm from './components/UserIdentityForm';
 
 import './index.css';
 
 function AppRoutes() {
-  const { user, loading } = useContext(AuthContext);
+  const { user, loading, identify } = useContext(AuthContext);
 
   if (loading) {
     return (
@@ -28,23 +30,29 @@ function AppRoutes() {
     );
   }
 
-  // If no user is logged in (and no bypass), redirected to login is handled by the Routes
-  // but we'll wrap in a basic check if needed.
+  if (!user) {
+    return (
+      <UserIdentityForm
+        onIdentified={({ name, studentId }) => identify(name, studentId)}
+      />
+    );
+  }
 
   return (
-    <div className="app-container">
-      <BrowserRouter>
+    <BrowserRouter>
+      <div className="app-container">
         <Navbar />
         <main className="app-main">
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/tickets" element={<Tickets />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
-      </BrowserRouter>
-    </div>
+      </div>
+    </BrowserRouter>
   );
 }
 
