@@ -38,7 +38,7 @@ const Navbar = () => {
 
         <nav className="flex items-center gap-8" style={{ marginLeft: '2rem' }}>
           <Link to="/dashboard" className="nav-link-custom">
-            Directory <LayoutDashboard size={18} />
+            Facilities <LayoutDashboard size={18} />
           </Link>
         </nav>
 

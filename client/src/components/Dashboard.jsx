@@ -78,7 +78,7 @@ const Dashboard = () => {
         <div>
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h2>Campus Directory</h2>
+                    <h2>Facilities Catalogue</h2>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Browse university facilities instantly.</p>
                 </div>
                 {user?.role === 'ADMIN' && (
