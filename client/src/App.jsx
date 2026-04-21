@@ -7,6 +7,8 @@ import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import Tickets from './components/Tickets';
 import UserIdentityForm from './components/UserIdentityForm';
+import MyBookings from './components/MyBookings';
+import CreateBooking from './components/CreateBooking';
 
 import './index.css';
 
@@ -48,6 +50,8 @@ function AppRoutes() {
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/tickets" element={<Tickets />} />
+            <Route path="/bookings/my" element={<MyBookings />} />
+            <Route path="/bookings/new" element={<CreateBooking />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
