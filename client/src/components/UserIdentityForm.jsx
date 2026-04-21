@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
-import { Building2, User as UserIcon, ShieldAlert } from 'lucide-react';
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+import { Building2, User as UserIcon, ShieldAlert, Calendar, Ticket, Bell } from 'lucide-react';
 
 const UserIdentityForm = ({ onIdentified }) => {
+    const { user, identify, googleLogin } = useContext(AuthContext);
+    const navigate = useNavigate();
     const [name, setName] = useState('');
     const [studentId, setStudentId] = useState('');
     const [error, setError] = useState('');
