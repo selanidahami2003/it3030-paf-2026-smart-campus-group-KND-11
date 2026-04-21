@@ -3,6 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import ResourceCard from './ResourceCard';
 import ResourceModal from './ResourceModal';
+import { Search } from 'lucide-react';
 
 const Dashboard = () => {
     const { user } = useContext(AuthContext);
@@ -53,7 +54,6 @@ const Dashboard = () => {
         setIsModalOpen(true);
     };
 
-
     const handleDeleteResource = async (id) => {
         if (window.confirm("Are you sure you want to delete this resource?")) {
             try {
@@ -66,7 +66,11 @@ const Dashboard = () => {
         }
     };
 
-    if (loading) return <div className="text-center mt-4">Loading catalog...</div>;
+    if (loading) return (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+            <div className="skel" style={{ width: '100px', height: '100px', borderRadius: '50%' }}></div>
+        </div>
+    );
 
     const filteredResources = resources.filter(res => {
         const matchesSearch = res.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -76,14 +80,18 @@ const Dashboard = () => {
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h2>Campus Directory</h2>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Browse university facilities instantly.</p>
+            <div className="directory-header">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h2>Campus Directory</h2>
+                        <p>Explore and book university facilities with ease.</p>
+                    </div>
+                    {user?.role === 'ADMIN' && (
+                        <button className="p-btn" style={{ background: 'white', color: 'var(--primary)' }} onClick={openCreateModal}>
+                            + Add Resource
+                        </button>
+                    )}
                 </div>
-                {user?.role === 'ADMIN' && (
-                    <button className="p-btn p-btn-primary" onClick={openCreateModal}>+ Add Resource</button>
-                )}
             </div>
             
             <ResourceModal 
@@ -93,42 +101,46 @@ const Dashboard = () => {
                 onSave={handleSaveResource} 
             />
 
-
-            <div className="flex gap-4 mb-6">
-                <input 
-                    type="text" 
-                    className="p-input" 
-                    placeholder="Search resources..." 
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ flex: 1 }}
-                />
+            <div className="search-container-modern">
+                <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Search size={20} style={{ position: 'absolute', left: '1rem', color: 'var(--text-secondary)' }} />
+                    <input 
+                        type="text" 
+                        className="p-input" 
+                        placeholder="Search for lecture halls, labs, or equipment..." 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ paddingLeft: '3rem', border: 'none', background: 'transparent' }}
+                    />
+                </div>
                 <select 
                     className="p-input" 
                     value={filterType}
                     onChange={(e) => setFilterType(e.target.value)}
-                    style={{ width: '200px' }}
+                    style={{ width: '180px', border: 'none', background: 'var(--surface-color-light)' }}
                 >
                     <option value="ALL">All Types</option>
-                    <option value="ROOM">Room</option>
-                    <option value="LAB">Lab</option>
+                    <option value="ROOM">Lecture Halls</option>
+                    <option value="LAB">Computer Labs</option>
                     <option value="EQUIPMENT">Equipment</option>
                 </select>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                {filteredResources.map(res => (
-                    <ResourceCard 
-                        key={res.id} 
-                        resource={res} 
-                        isAdmin={user?.role === 'ADMIN'}
-                        onEdit={openEditModal}
-                        onDelete={handleDeleteResource}
-                    />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
+                {filteredResources.map((res, index) => (
+                    <div key={res.id} className="fade-in-up" style={{ animationDelay: `${index * 0.05}s`, opacity: 0, fillMode: 'forwards' }}>
+                        <ResourceCard 
+                            resource={res} 
+                            isAdmin={user?.role === 'ADMIN'}
+                            onEdit={openEditModal}
+                            onDelete={handleDeleteResource}
+                        />
+                    </div>
                 ))}
-                {resources.length === 0 && (
-                    <div className="p-card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem' }}>
-                        No physical assets or rooms found in the catalog.
+                {filteredResources.length === 0 && (
+                    <div className="p-card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '5rem 3rem', background: 'transparent', border: '2px dashed var(--border-color)' }}>
+                        <div style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text-secondary)' }}>No assets match your search.</div>
+                        <p>Try adjusting your filters or search terms.</p>
                     </div>
                 )}
             </div>

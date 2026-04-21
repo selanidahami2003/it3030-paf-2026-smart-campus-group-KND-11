@@ -34,30 +34,18 @@ function AppRoutes() {
 
   return (
     <BrowserRouter>
-      {user && <Navbar />}
-      <Routes>
-        {/* Unauthenticated routes */}
-        {!user && (
-          <>
+      <div className="app-container">
+        <Navbar />
+        <main className="app-main">
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<UserIdentityForm />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </>
-        )}
-
-        {/* Authenticated routes */}
-        {user && (
-          <>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/tickets" element={<Tickets />} />
-            <Route path="/bookings" element={<MyBookings />} />
-            <Route path="/bookings/new" element={<CreateBooking />} />
-            {/* Notifications page placeholder or panel trigger logic */}
-            <Route path="/notifications" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </>
-        )}
-      </Routes>
+          </Routes>
+        </main>
+      </div>
     </BrowserRouter>
   );
 }

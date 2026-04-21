@@ -1,8 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { LayoutGrid, GraduationCap, Briefcase, Wrench, ArrowRight, Quote, Calendar, Ticket, Bell } from 'lucide-react';
-import { GoogleLogin } from '@react-oauth/google';
-import { AuthContext } from '../context/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Building2, User as UserIcon, ShieldAlert } from 'lucide-react';
 
 const UserIdentityForm = () => {
     const { user, identify, googleLogin } = useContext(AuthContext);
@@ -178,150 +175,56 @@ const UserIdentityForm = () => {
                         border: '1px solid rgba(255, 255, 255, 0.8)',
                         position: 'relative'
                     }}>
-                        
-                        {error && (
-                            <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', padding: '0.75rem 1rem', marginBottom: '1.25rem', color: '#DC2626', fontSize: '0.875rem', fontWeight: '500' }}>
-                                ⚠️ {error}
-                            </div>
-                        )}
+                        ⚠️ {error}
+                    </div>
+                )}
 
-                        <form onSubmit={handleSubmit}>
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.6rem', color: '#334155', fontSize: '0.875rem', fontWeight: '600' }}>Select Account Type</label>
-                                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                    {[
-                                        { id: 'Student', icon: GraduationCap },
-                                        { id: 'Staff', icon: Briefcase },
-                                        { id: 'Technician', icon: Wrench }
-                                    ].map((type) => {
-                                        const isSelected = role === type.id;
-                                        const Icon = type.icon;
-                                        return (
-                                            <button
-                                                key={type.id}
-                                                type="button"
-                                                onClick={() => setRole(type.id)}
-                                                style={{
-                                                    flex: 1,
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    padding: '0.75rem',
-                                                    borderRadius: '14px',
-                                                    border: isSelected ? '2px solid #2D5B75' : '1px solid #E2E8F0',
-                                                    background: isSelected ? '#F0F9FF' : 'rgba(255, 255, 255, 0.5)',
-                                                    color: isSelected ? '#2D5B75' : '#64748B',
-                                                    cursor: 'pointer',
-                                                    transition: 'all 0.2s'
-                                                }}
-                                            >
-                                                <Icon size={20} style={{ marginBottom: '0.25rem' }} />
-                                                <span style={{ fontSize: '0.75rem', fontWeight: isSelected ? '700' : '500' }}>{type.id}</span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
-                                <div style={{ flex: 1 }}>
-                                    <label style={{ display: 'block', marginBottom: '0.6rem', color: '#334155', fontSize: '0.875rem', fontWeight: '600' }}>Full Name</label>
-                                    <input
-                                        type="text"
-                                        value={name}
-                                        onChange={e => setName(e.target.value)}
-                                        required
-                                        placeholder="Full Name"
-                                        style={{ width: '100%', padding: '0.875rem 1.1rem', borderRadius: '14px', border: '1px solid #E2E8F0', fontSize: '0.95rem', background: 'rgba(255, 255, 255, 0.5)', transition: 'all 0.2s' }}
-                                    />
-                                </div>
-                            </div>
-
-                            <div style={{ marginBottom: '1.25rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.6rem', color: '#334155', fontSize: '0.875rem', fontWeight: '600' }}>Email Address</label>
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={e => setEmail(e.target.value)}
-                                    required
-                                    placeholder="name@university.edu"
-                                    style={{ width: '100%', padding: '0.875rem 1.1rem', borderRadius: '14px', border: '1px solid #E2E8F0', fontSize: '0.95rem', background: 'rgba(255, 255, 255, 0.5)', transition: 'all 0.2s' }}
-                                />
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.75rem' }}>
-                                <div style={{ flex: 1 }}>
-                                    <label style={{ display: 'block', marginBottom: '0.6rem', color: '#334155', fontSize: '0.875rem', fontWeight: '600' }}>Password</label>
-                                    <input
-                                        type="password"
-                                        value={password}
-                                        onChange={e => setPassword(e.target.value)}
-                                        required
-                                        placeholder="••••••••"
-                                        style={{ width: '100%', padding: '0.875rem 1.1rem', borderRadius: '14px', border: '1px solid #E2E8F0', fontSize: '0.95rem', background: 'rgba(255, 255, 255, 0.5)', transition: 'all 0.2s' }}
-                                    />
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                    <label style={{ display: 'block', marginBottom: '0.6rem', color: '#334155', fontSize: '0.875rem', fontWeight: '600' }}>Confirm</label>
-                                    <input
-                                        type="password"
-                                        value={confirmPassword}
-                                        onChange={e => setConfirmPassword(e.target.value)}
-                                        required
-                                        placeholder="••••••••"
-                                        style={{ width: '100%', padding: '0.875rem 1.1rem', borderRadius: '14px', border: '1px solid #E2E8F0', fontSize: '0.95rem', background: 'rgba(255, 255, 255, 0.5)', transition: 'all 0.2s' }}
-                                    />
-                                </div>
-                            </div>
-
-                            <button
-                                type="submit"
-                                style={{
-                                    width: '100%', background: '#2D5B75', color: 'white', padding: '1rem', borderRadius: '14px', border: 'none', fontSize: '1rem', fontWeight: '700', cursor: 'pointer', transition: 'all 0.3s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', boxShadow: '0 4px 12px rgba(45, 91, 117, 0.25)'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = '#123249';
-                                    e.currentTarget.style.transform = 'translateY(-2px)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = '#2D5B75';
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                }}
-                            >
-                                Create Hub Account <ArrowRight size={18} />
-                            </button>
-                        </form>
-
-                        <div style={{ textAlign: 'center', margin: '1.5rem 0', color: '#9CA3AF', fontSize: '0.85rem', display: 'flex', alignItems: 'center' }}>
-                            <div style={{ flex: 1, height: '1px', background: '#F3F4F6' }}></div>
-                            <span style={{ padding: '0 10px' }}>OR</span>
-                            <div style={{ flex: 1, height: '1px', background: '#F3F4F6' }}></div>
+                <div style={{ display: 'grid', gap: '1rem' }}>
+                    <button
+                        onClick={() => onIdentified({ name: 'Admin User', studentId: 'ADMIN001' })}
+                        className="p-btn p-btn-primary w-full"
+                        style={{ 
+                            fontSize: '1rem', 
+                            padding: '1.25rem', 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            gap: '0.25rem',
+                            height: 'auto',
+                            background: 'var(--primary)'
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <ShieldAlert size={20} />
+                            <span>Administrator Portal</span>
                         </div>
+                        <span style={{ fontSize: '0.75rem', fontWeight: '400', opacity: 0.8 }}>Access all tickets and management tools</span>
+                    </button>
 
-                        <div style={{ display: 'flex', justifyContent: 'center' }}>
-                            <GoogleLogin
-                                onSuccess={handleGoogleSuccess}
-                                onError={() => setError('Google login failed')}
-                                size="large"
-                                width="100%"
-                                shape="rectangular"
-                            />
+                    <button
+                        onClick={() => onIdentified({ name: 'Student User', studentId: 'ST67890' })}
+                        className="p-btn p-btn-secondary w-full"
+                        style={{ 
+                            fontSize: '1rem', 
+                            padding: '1.25rem', 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            gap: '0.25rem',
+                            height: 'auto',
+                            borderColor: 'var(--primary)',
+                            color: 'var(--primary)'
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <UserIcon size={20} />
+                            <span>Student / Staff User</span>
                         </div>
-
-                    </div>
-
-                    <div style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.875rem', color: '#6B7280' }}>
-                        Already have an account? <Link to="/login" style={{ color: '#111827', fontWeight: '600', textDecoration: 'none' }}>Sign in here</Link>
-                    </div>
-                    
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginTop: '3rem', fontSize: '0.7rem', fontWeight: '600', letterSpacing: '0.1em', color: '#9CA3AF' }}>
-                        <span style={{ cursor: 'pointer' }}>PRIVACY</span>
-                        <span style={{ cursor: 'pointer' }}>ACCESSIBILITY</span>
-                        <span style={{ cursor: 'pointer' }}>SECURITY</span>
-                    </div>
-
+                        <span style={{ fontSize: '0.75rem', fontWeight: '400', color: 'var(--text-tertiary)' }}>Report incidents and track your requests</span>
+                    </button>
                 </div>
+
+                <p style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '1.25rem' }}>
+                    Your details will be used to track your submitted tickets.
+                </p>
             </div>
         </div>
     );
