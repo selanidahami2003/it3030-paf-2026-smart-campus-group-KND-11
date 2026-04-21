@@ -42,6 +42,8 @@ function AppRoutes() {
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/tickets" element={<Tickets />} />
+            <Route path="/bookings/my" element={<MyBookings />} />
+            <Route path="/bookings/new" element={<CreateBooking />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
