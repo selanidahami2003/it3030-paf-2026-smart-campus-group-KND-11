@@ -13,7 +13,7 @@ import CreateBooking from './components/CreateBooking';
 import './index.css';
 
 function AppRoutes() {
-  const { user, loading, identify } = useContext(AuthContext);
+  const { user, loading } = useContext(AuthContext);
 
   if (loading) {
     return (
@@ -29,14 +29,6 @@ function AppRoutes() {
       >
         Loading...
       </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <UserIdentityForm
-        onIdentified={({ name, studentId }) => identify(name, studentId)}
-      />
     );
   }
 

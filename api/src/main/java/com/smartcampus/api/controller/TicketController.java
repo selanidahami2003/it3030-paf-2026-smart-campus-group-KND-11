@@ -23,16 +23,26 @@ public class TicketController {
         return ticketService.getAllTickets();
     }
 
+    private String resolveUserId(UserPrincipal currentUser, String headerUserId) {
+        if (currentUser != null) {
+            return currentUser.getId();
+        }
+        return headerUserId != null ? headerUserId : "2";
+    }
+
     @GetMapping("/my")
-    public List<TicketSummaryDTO> getMyTickets(@AuthenticationPrincipal UserPrincipal currentUser) {
-        String userId = currentUser != null ? currentUser.getId() : "2";
-        return ticketService.getTicketsByCreator(userId);
+    public List<TicketSummaryDTO> getMyTickets(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId) {
+        return ticketService.getTicketsByCreator(resolveUserId(currentUser, headerUserId));
     }
 
     @PostMapping
-    public Ticket createTicket(@AuthenticationPrincipal UserPrincipal currentUser, @RequestBody Ticket request) {
-        String userId = currentUser != null ? currentUser.getId() : "2";
-        return ticketService.createTicket(userId, request);
+    public Ticket createTicket(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
+            @RequestBody Ticket request) {
+        return ticketService.createTicket(resolveUserId(currentUser, headerUserId), request);
     }
 
     @PutMapping("/{id}/status")
@@ -53,8 +63,11 @@ public class TicketController {
     }
 
     @PostMapping("/{id}/comments")
-    public Comment addComment(@PathVariable("id") String id, @AuthenticationPrincipal UserPrincipal currentUser, @RequestBody Map<String, String> request) {
-        String userId = currentUser != null ? currentUser.getId() : "2";
-        return ticketService.addComment(id, userId, request.get("content"));
+    public Comment addComment(
+            @PathVariable("id") String id,
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
+            @RequestBody Map<String, String> request) {
+        return ticketService.addComment(id, resolveUserId(currentUser, headerUserId), request.get("content"));
     }
 }

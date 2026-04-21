@@ -50,6 +50,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/tickets/**").permitAll()
                 .requestMatchers("/api/files/**").permitAll()
                 .requestMatchers("/api/resources/**").permitAll()
+                .requestMatchers("/api/notifications/**").permitAll()
+                .requestMatchers("/api/bookings/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
             );
