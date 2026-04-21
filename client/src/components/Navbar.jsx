@@ -63,11 +63,11 @@ const Navbar = () => {
             top: 0,
             zIndex: 100,
             backdropFilter: 'blur(10px)',
-            background: 'rgba(22, 101, 52, 0.95)',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+            background: 'rgba(18, 50, 73, 0.95)', // Midnight blue glass effect
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.2)'
         }}>
             <div className="nav-container" style={{
-                maxWidth: '1280px',
+                maxWidth: '1400px',
                 margin: '0 auto',
                 padding: '0 1.5rem',
                 height: '70px',
@@ -86,12 +86,12 @@ const Navbar = () => {
                         color: 'white' 
                     }}
                 >
-                    <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '6px', display: 'flex' }}>
-                        <Building2 size={24} color="var(--primary)" />
+                    <div style={{ backgroundColor: 'white', borderRadius: '10px', padding: '4px', display: 'flex', width: '40px', height: '40px', overflow: 'hidden' }}>
+                        <img src="/logo.png" alt="Smart Campus Hub Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '1.1rem', fontWeight: '800', letterSpacing: '-0.02em', lineHeight: 1 }}>SMART CAMPUS</span>
-                        <span style={{ fontSize: '0.7rem', fontWeight: '500', opacity: 0.9, letterSpacing: '0.05em' }}>OPERATIONS HUB</span>
+                        <span style={{ fontSize: '1.2rem', fontWeight: '800', letterSpacing: '-0.02em', lineHeight: 1 }}>SMART CAMPUS</span>
+                        <span style={{ fontSize: '0.7rem', fontWeight: '600', opacity: 0.8, letterSpacing: '0.1em' }}>HUB PLATFORM</span>
                     </div>
                 </Link>
 

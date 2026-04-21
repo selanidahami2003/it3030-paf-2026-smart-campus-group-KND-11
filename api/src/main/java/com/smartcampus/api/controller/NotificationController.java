@@ -17,14 +17,25 @@ import java.util.Map;
 public class NotificationController {
     private final NotificationService notificationService;
 
+    private String resolveUserId(UserPrincipal userPrincipal, String headerUserId) {
+        if (userPrincipal != null) {
+            return userPrincipal.getId();
+        }
+        return headerUserId != null ? headerUserId : "2";
+    }
+
     @GetMapping
-    public List<Notification> getMyNotifications(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return notificationService.getUserNotifications(userPrincipal.getId());
+    public List<Notification> getMyNotifications(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId) {
+        return notificationService.getUserNotifications(resolveUserId(userPrincipal, headerUserId));
     }
 
     @GetMapping("/unread-count")
-    public Map<String, Long> getUnreadCount(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return Map.of("count", notificationService.getUnreadCount(userPrincipal.getId()));
+    public Map<String, Long> getUnreadCount(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId) {
+        return Map.of("count", notificationService.getUnreadCount(resolveUserId(userPrincipal, headerUserId)));
     }
 
     @PutMapping("/{id}/read")
@@ -34,8 +45,10 @@ public class NotificationController {
     }
 
     @PutMapping("/read-all")
-    public ResponseEntity<?> markAllAsRead(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        notificationService.markAllAsRead(userPrincipal.getId());
+    public ResponseEntity<?> markAllAsRead(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId) {
+        notificationService.markAllAsRead(resolveUserId(userPrincipal, headerUserId));
         return ResponseEntity.ok().build();
     }
 }

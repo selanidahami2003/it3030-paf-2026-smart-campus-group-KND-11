@@ -14,10 +14,27 @@ import java.util.List;
 public class BookingController {
     private final BookingService bookingService;
 
+    private String resolveUserId(UserPrincipal userPrincipal, String headerUserId) {
+        if (userPrincipal != null) {
+            return userPrincipal.getId();
+        }
+        return headerUserId != null ? headerUserId : "2";
+    }
+
+    private String resolveUserName(UserPrincipal userPrincipal) {
+        if (userPrincipal != null) {
+            return userPrincipal.getUsername();
+        }
+        return "Mock User";
+    }
+
     @PostMapping
-    public Booking createBooking(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody Booking booking) {
-        booking.setUserId(userPrincipal.getId());
-        booking.setUserName(userPrincipal.getUsername());
+    public Booking createBooking(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
+            @RequestBody Booking booking) {
+        booking.setUserId(resolveUserId(userPrincipal, headerUserId));
+        booking.setUserName(resolveUserName(userPrincipal));
         return bookingService.createBooking(booking);
     }
 
@@ -27,8 +44,10 @@ public class BookingController {
     }
 
     @GetMapping("/my")
-    public List<Booking> getMyBookings(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return bookingService.getBookingsByUser(userPrincipal.getId());
+    public List<Booking> getMyBookings(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId) {
+        return bookingService.getBookingsByUser(resolveUserId(userPrincipal, headerUserId));
     }
 
     @PutMapping("/{id}/status")

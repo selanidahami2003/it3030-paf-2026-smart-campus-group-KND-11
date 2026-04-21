@@ -8,6 +8,8 @@ const NotificationPanel = ({ onClose }) => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
+    const [filter, setFilter] = useState('all');
+
     const fetchNotifications = async () => {
         try {
             const res = await api.get('/notifications');
@@ -51,6 +53,8 @@ const NotificationPanel = ({ onClose }) => {
         onClose();
     };
 
+    const displayedNotifications = filter === 'unread' ? notifications.filter(n => !n.read) : notifications;
+
     return (
         <div className="notification-panel p-card" style={{
             position: 'absolute',
@@ -90,23 +94,65 @@ const NotificationPanel = ({ onClose }) => {
                 </button>
             </div>
 
+            {/* Filter Tabs */}
+            <div style={{
+                display: 'flex',
+                padding: '0 1rem',
+                borderBottom: '1px solid var(--border-color)',
+                backgroundColor: 'var(--surface-color-light)',
+                gap: '1rem'
+            }}>
+                <button
+                    onClick={() => setFilter('all')}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: '0.75rem 0',
+                        fontSize: '0.85rem',
+                        fontWeight: filter === 'all' ? '600' : '400',
+                        color: filter === 'all' ? 'var(--primary)' : 'var(--text-secondary)',
+                        borderBottom: filter === 'all' ? '2px solid var(--primary)' : '2px solid transparent',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    All
+                </button>
+                <button
+                    onClick={() => setFilter('unread')}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: '0.75rem 0',
+                        fontSize: '0.85rem',
+                        fontWeight: filter === 'unread' ? '600' : '400',
+                        color: filter === 'unread' ? 'var(--primary)' : 'var(--text-secondary)',
+                        borderBottom: filter === 'unread' ? '2px solid var(--primary)' : '2px solid transparent',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    Unread
+                </button>
+            </div>
+
             <div style={{ overflowY: 'auto', flex: 1 }}>
                 {loading ? (
                     <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Loading...</div>
-                ) : notifications.length === 0 ? (
+                ) : displayedNotifications.length === 0 ? (
                     <div style={{ padding: '3rem 2rem', textAlign: 'center' }}>
                         <Bell size={40} style={{ color: 'var(--border-color)', marginBottom: '1rem' }} />
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>No notifications yet</p>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                            {filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}
+                        </p>
                     </div>
                 ) : (
-                    notifications.map(n => (
+                    displayedNotifications.map(n => (
                         <div 
                             key={n.id} 
-                            onClick={() => handleNotificationClick(n)}
                             style={{
                                 padding: '1rem',
                                 borderBottom: '1px solid var(--border-color)',
-                                cursor: 'pointer',
                                 backgroundColor: n.read ? 'transparent' : 'rgba(22, 101, 52, 0.03)',
                                 transition: 'background-color 0.2s',
                                 display: 'flex',
@@ -127,7 +173,10 @@ const NotificationPanel = ({ onClose }) => {
                                     top: '1.25rem'
                                 }}></div>
                             )}
-                            <div style={{ flex: 1 }}>
+                            <div 
+                                style={{ flex: 1, cursor: 'pointer' }}
+                                onClick={() => handleNotificationClick(n)}
+                            >
                                 <p style={{ 
                                     margin: '0 0 4px 0', 
                                     fontSize: '0.875rem', 
@@ -141,6 +190,31 @@ const NotificationPanel = ({ onClose }) => {
                                     {new Date(n.createdAt).toLocaleString()}
                                 </span>
                             </div>
+                            {/* Individual Close/Dismiss Button */}
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    markAsRead(n.id);
+                                }}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: 'var(--text-secondary)',
+                                    padding: '4px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    opacity: 0.6,
+                                    transition: 'opacity 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
+                                onMouseLeave={(e) => e.currentTarget.style.opacity = 0.6}
+                                title="Mark as read"
+                            >
+                                <Check size={16} />
+                            </button>
                         </div>
                     ))
                 )}
@@ -153,14 +227,23 @@ const NotificationPanel = ({ onClose }) => {
                 backgroundColor: 'var(--surface-color-light)'
             }}>
                 <button 
-                    onClick={onClose}
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        onClose();
+                    }}
                     style={{ 
                         fontSize: '0.875rem', 
                         color: 'var(--text-secondary)', 
                         background: 'none', 
                         border: 'none', 
-                        cursor: 'pointer' 
+                        cursor: 'pointer',
+                        padding: '8px 16px',
+                        borderRadius: '4px'
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                     Close
                 </button>
