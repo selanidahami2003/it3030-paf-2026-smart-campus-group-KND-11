@@ -90,4 +90,8 @@ public class TicketService {
     public List<Comment> getComments(String ticketId) {
         return commentRepository.findByTicketIdOrderByCreatedAtAsc(ticketId);
     }
+
+    public Ticket getTicketById(String id) {
+        return ticketRepository.findById(id).orElseThrow(() -> new RuntimeException("Ticket not found"));
+    }
 }

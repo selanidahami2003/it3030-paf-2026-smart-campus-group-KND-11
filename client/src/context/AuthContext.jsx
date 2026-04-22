@@ -33,12 +33,13 @@ export const AuthProvider = ({ children }) => {
 
   // Called when user fills the identity form
   const identify = (name, studentId) => {
+    const isSystemAdmin = studentId.startsWith('ADMIN');
     const newUser = {
-      id: '2',
+      id: isSystemAdmin ? '1' : '2',
       name,
       studentId,
-      email: 'user@smartcampus.edu',
-      role: 'USER',
+      email: isSystemAdmin ? 'admin@smartcampus.edu' : 'user@smartcampus.edu',
+      role: isSystemAdmin ? 'ADMIN' : 'USER',
     };
 
     localStorage.setItem('user', JSON.stringify(newUser));

@@ -16,7 +16,8 @@ import {
     CheckCircle2,
     Clock,
     XCircle,
-    Plus
+    Plus,
+    Loader2
 } from 'lucide-react';
 
 // ─── Skeleton loader for individual ticket cards ───────────────────────────────
@@ -101,16 +102,35 @@ const Tickets = () => {
             setActiveTicketId(null);
             return;
         }
+        
         setActiveTicketId(id);
-        if (!comments[id]) {
-            try {
-                const res = await api.get(`/tickets/${id}/comments`);
-                setComments(prev => ({ ...prev, [id]: res.data }));
-            } catch {
-                setComments(prev => ({ ...prev, [id]: [] }));
+        
+        const ticket = tickets.find(t => t.id === id);
+        
+        // Lazy-load full ticket data (attachments) and comments
+        try {
+            const fetchPromises = [];
+            
+            // If ticket has attachments but they aren't loaded in the summary, fetch full ticket
+            if (ticket?.hasAttachments && !ticket?.attachment1) {
+                fetchPromises.push(api.get(`/tickets/${id}`).then(res => {
+                    setTickets(prev => prev.map(t => t.id === id ? { ...t, ...res.data } : t));
+                }));
             }
+            
+            if (!comments[id]) {
+                fetchPromises.push(api.get(`/tickets/${id}/comments`).then(res => {
+                    setComments(prev => ({ ...prev, [id]: res.data }));
+                }));
+            }
+            
+            if (fetchPromises.length > 0) {
+                await Promise.all(fetchPromises);
+            }
+        } catch (err) {
+            console.error('Failed to lazy load ticket details:', err);
         }
-    }, [activeTicketId, comments]);
+    }, [activeTicketId, comments, tickets]);
 
     const handleComment = useCallback(async (id) => {
         if (!newComment.trim()) return;
@@ -269,16 +289,23 @@ const Tickets = () => {
 
                                         <div style={{ marginBottom: '2rem' }}>
                                             <h4 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', letterSpacing: '0.05em', marginBottom: '1rem' }}>Evidence Photos</h4>
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
-                                                {[t.attachment1, t.attachment2, t.attachment3].filter(Boolean).map((img, i) => (
-                                                    <div key={i} className="ticket-card-modern" style={{ height: '150px', overflow: 'hidden' }}>
-                                                        <img src={img} alt="Evidence" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                    </div>
-                                                ))}
-                                                {![t.attachment1, t.attachment2, t.attachment3].filter(Boolean).length && (
-                                                    <div style={{ color: 'var(--text-tertiary)', fontStyle: 'italic', fontSize: '0.9rem' }}>No evidence uploaded.</div>
-                                                )}
-                                            </div>
+                                            {t.hasAttachments && !t.attachment1 ? (
+                                                <div className="flex items-center gap-3 color-tertiary">
+                                                    <Loader2 className="spinner" size={16} />
+                                                    <span style={{ fontSize: '0.9rem' }}>Loading evidence...</span>
+                                                </div>
+                                            ) : (
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
+                                                    {[t.attachment1, t.attachment2, t.attachment3].filter(Boolean).map((img, i) => (
+                                                        <div key={i} className="ticket-card-modern" style={{ height: '150px', overflow: 'hidden' }}>
+                                                            <img src={img} alt="Evidence" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                        </div>
+                                                    ))}
+                                                    {![t.attachment1, t.attachment2, t.attachment3].filter(Boolean).length && (
+                                                        <div style={{ color: 'var(--text-tertiary)', fontStyle: 'italic', fontSize: '0.9rem' }}>No evidence uploaded.</div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
