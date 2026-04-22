@@ -70,4 +70,9 @@ public class TicketController {
             @RequestBody Map<String, String> request) {
         return ticketService.addComment(id, resolveUserId(currentUser, headerUserId), request.get("content"));
     }
+
+    @GetMapping("/{id}")
+    public Ticket getTicket(@PathVariable("id") String id) {
+        return ticketService.getTicketById(id);
+    }
 }

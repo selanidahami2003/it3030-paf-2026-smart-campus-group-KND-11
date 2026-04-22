@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
     if (roleStr === 'STUDENT') finalRole = 'USER';
 
     const newUser = {
-      id: '2',
+      id: isSystemAdmin ? '1' : '2',
       name,
       studentId: `ID-${Math.floor(Math.random() * 1000)}`,
       email: `${name.toLowerCase().replace(/\s/g, '')}@smartcampus.edu`,
