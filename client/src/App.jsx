@@ -7,11 +7,13 @@ import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import Tickets from './components/Tickets';
 import UserIdentityForm from './components/UserIdentityForm';
+import MyBookings from './components/MyBookings';
+import CreateBooking from './components/CreateBooking';
 
 import './index.css';
 
 function AppRoutes() {
-  const { user, loading, identify } = useContext(AuthContext);
+  const { user, loading } = useContext(AuthContext);
 
   if (loading) {
     return (
@@ -30,14 +32,6 @@ function AppRoutes() {
     );
   }
 
-  if (!user) {
-    return (
-      <UserIdentityForm
-        onIdentified={({ name, studentId }) => identify(name, studentId)}
-      />
-    );
-  }
-
   return (
     <BrowserRouter>
       <div className="app-container">
@@ -48,6 +42,8 @@ function AppRoutes() {
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/tickets" element={<Tickets />} />
+            <Route path="/bookings/my" element={<MyBookings />} />
+            <Route path="/bookings/new" element={<CreateBooking />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
