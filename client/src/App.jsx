@@ -43,6 +43,7 @@ function AppRoutes() {
             <Route path="/" element={<Navigate to="/home" replace />} />
             <Route path="/home" element={<Home />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<UserIdentityForm />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/tickets" element={<Tickets />} />
             <Route path="/bookings/my" element={<MyBookings />} />

@@ -8,9 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Document(collection = "notifications")
 public class Notification {
     @Id
@@ -22,6 +19,18 @@ public class Notification {
     private LocalDateTime createdAt;
     private boolean read;
 
+    public Notification() {}
+
+    public Notification(String id, String recipientId, String message, String type, String relatedId, LocalDateTime createdAt, boolean read) {
+        this.id = id;
+        this.recipientId = recipientId;
+        this.message = message;
+        this.type = type;
+        this.relatedId = relatedId;
+        this.createdAt = createdAt;
+        this.read = read;
+    }
+
     public Notification(String recipientId, String message, String type, String relatedId) {
         this.recipientId = recipientId;
         this.message = message;
@@ -30,4 +39,19 @@ public class Notification {
         this.createdAt = LocalDateTime.now();
         this.read = false;
     }
+
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+    public String getRecipientId() { return recipientId; }
+    public void setRecipientId(String recipientId) { this.recipientId = recipientId; }
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+    public String getRelatedId() { return relatedId; }
+    public void setRelatedId(String relatedId) { this.relatedId = relatedId; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public boolean isRead() { return read; }
+    public void setRead(boolean read) { this.read = read; }
 }

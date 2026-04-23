@@ -2,13 +2,14 @@ import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import {
-  ClipboardList,
-  Wrench,
-  LayoutDashboard,
-  LogOut,
-  User as UserIcon,
-  Calendar,
-  Bell
+    Building2,
+    ClipboardList,
+    Wrench,
+    LayoutDashboard,
+    LogOut,
+    User as UserIcon,
+    Calendar,
+    Bell
 } from 'lucide-react';
 import api from '../services/api';
 
@@ -72,11 +73,11 @@ const Navbar = () => {
             }}>
                 {/* Brand */}
                 <Link
-                    to="/home"
+                    to="/dashboard"
                     style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.5rem',
+                        gap: '0.75rem',
                         textDecoration: 'none',
                         color: 'white'
                     }}
@@ -176,9 +177,7 @@ const Navbar = () => {
                                     )}
                                 </button>
                                 {showNotifications && (
-                                    <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '0.5rem', background: 'white', color: 'black', padding: '1rem', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', zIndex: 50, whiteSpace: 'nowrap' }}>
-                                        Notifications coming soon...
-                                    </div>
+                                    <NotificationPanel onClose={() => setShowNotifications(false)} />
                                 )}
                             </div>
 
@@ -239,8 +238,8 @@ const Navbar = () => {
                             border: '1px solid rgba(255, 255, 255, 0.3)',
                             transition: 'all 0.2s'
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                         >
                             Sign In
                         </Link>
