@@ -7,9 +7,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
+
+    public NotificationService(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
+    }
 
     public void createNotification(String recipientId, String message, String type, String relatedId) {
         Notification notification = new Notification(recipientId, message, type, relatedId);

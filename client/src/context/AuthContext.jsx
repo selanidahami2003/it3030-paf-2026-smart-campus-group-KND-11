@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }) => {
   // Called when user fills the identity form
   const identify = (name, roleStr) => {
     let finalRole = roleStr;
+    const isSystemAdmin = roleStr === 'ADMIN';
     if (roleStr === 'STUDENT') finalRole = 'USER';
 
     const newUser = {
