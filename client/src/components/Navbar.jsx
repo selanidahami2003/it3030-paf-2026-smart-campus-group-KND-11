@@ -11,7 +11,6 @@ import {
     Calendar,
     Bell
 } from 'lucide-react';
-import NotificationPanel from './NotificationPanel';
 import api from '../services/api';
 
 const Navbar = () => {
@@ -34,11 +33,10 @@ const Navbar = () => {
 
     useEffect(() => {
         fetchUnreadCount();
-        const interval = setInterval(fetchUnreadCount, 30000); // Poll every 30s
+        const interval = setInterval(fetchUnreadCount, 30000);
         return () => clearInterval(interval);
     }, [user]);
 
-    // Close notifications when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (notificationRef.current && !notificationRef.current.contains(event.target)) {
@@ -61,9 +59,8 @@ const Navbar = () => {
             position: 'sticky',
             top: 0,
             zIndex: 100,
-            backdropFilter: 'blur(10px)',
-            background: 'rgba(18, 50, 73, 0.95)', // Midnight blue glass effect
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.2)'
+            backgroundColor: '#115e59', // Green theme
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }}>
             <div className="nav-container" style={{
                 maxWidth: '1400px',
@@ -85,13 +82,14 @@ const Navbar = () => {
                         color: 'white'
                     }}
                 >
-                    <div style={{ backgroundColor: 'white', borderRadius: '10px', padding: '4px', display: 'flex', width: '40px', height: '40px', overflow: 'hidden' }}>
-                        <img src="/logo.png" alt="Smart Campus Hub Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    <div style={{ backgroundColor: 'white', borderRadius: '4px', padding: '2px', display: 'flex' }}>
+                        <img src="/logo.png" alt="Logo" style={{ width: '24px', height: '24px', objectFit: 'contain' }} 
+                             onError={(e) => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
+                        <div style={{ display: 'none', width: '24px', height: '24px', color: '#115e59', alignItems: 'center', justifyContent: 'center' }}>
+                            <LayoutDashboard size={18} />
+                        </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '1.2rem', fontWeight: '800', letterSpacing: '-0.02em', lineHeight: 1 }}>SMART CAMPUS</span>
-                        <span style={{ fontSize: '0.7rem', fontWeight: '600', opacity: 0.8, letterSpacing: '0.1em' }}>HUB PLATFORM</span>
-                    </div>
+                    <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Smart Campus Hub</span>
                 </Link>
 
                 {/* Nav links */}
@@ -101,28 +99,31 @@ const Navbar = () => {
                     gap: '1.5rem',
                     marginLeft: '2.5rem'
                 }}>
-                    <Link to="/dashboard" className={`nav-link-custom ${isActive('/dashboard') ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <LayoutDashboard size={18} /> Dashboard
+                    <Link to="/home" className={`nav-link-custom ${isActive('/home') ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        Home
+                    </Link>
+                    <Link to="/dashboard" className={`nav-link-custom ${isActive('/dashboard') ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        Facilities <LayoutDashboard size={16} />
                     </Link>
 
                     {user?.role === 'USER' && (
                         <>
-                            <Link to="/bookings/my" className={`nav-link-custom ${isActive('/bookings/my') ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <Calendar size={18} /> My Bookings
+                            <Link to="/bookings/my" className={`nav-link-custom ${isActive('/bookings/my') ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                My Bookings <Calendar size={16} />
                             </Link>
-                            <Link to="/tickets" className={`nav-link-custom ${isActive('/tickets') ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <ClipboardList size={18} /> My Tickets
+                            <Link to="/reporting" className={`nav-link-custom ${isActive('/reporting') ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                Reporting <ClipboardList size={16} />
                             </Link>
                         </>
                     )}
 
                     {(user?.role === 'ADMIN' || user?.role === 'STAFF' || user?.role === 'TECHNICIAN') && (
                         <>
-                            <Link to="/bookings" className={`nav-link-custom ${isActive('/bookings') ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <Calendar size={18} /> Manage Bookings
+                            <Link to="/bookings" className={`nav-link-custom ${isActive('/bookings') ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                Booking Admin <Calendar size={16} />
                             </Link>
-                            <Link to="/tickets" className={`nav-link-custom ${isActive('/tickets') ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <Wrench size={18} /> Jobs & Tickets
+                            <Link to="/tickets" className={`nav-link-custom ${isActive('/tickets') ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                Jobs &amp; Tickets <Wrench size={16} />
                             </Link>
                         </>
                     )}

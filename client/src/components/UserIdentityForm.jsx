@@ -28,8 +28,6 @@ const UserIdentityForm = () => {
             setError('Passwords do not match');
             return;
         }
-        // In a real app, you would call a register endpoint.
-        // For now, we mock it via identify as before.
         identify(name, role.toUpperCase());
     };
 
@@ -137,7 +135,7 @@ const UserIdentityForm = () => {
                     </div>
                 </div>
 
-                {/* Footer info or minimal bottom text */}
+                {/* Footer */}
                 <div style={{ opacity: 0.6, fontSize: '0.85rem' }}>
                     © 2026 Smart Campus Hub. All rights reserved.
                 </div>
@@ -146,7 +144,7 @@ const UserIdentityForm = () => {
             {/* Right Side - Form */}
             <div style={{
                 flex: 1,
-                backgroundColor: '#F8FAFC', // Subtle off-white background
+                backgroundColor: '#F8FAFC',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -154,12 +152,11 @@ const UserIdentityForm = () => {
                 padding: '2rem'
             }}>
                 <div style={{ width: '100%', maxWidth: '440px' }}>
-
                     <div style={{ marginBottom: '2rem' }}>
                         <div style={{ fontSize: '0.75rem', fontWeight: '600', letterSpacing: '0.1em', color: '#6B7280', marginBottom: '0.5rem' }}>
                             GET STARTED
                         </div>
-                        <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: '#0F172A', marginBottom: '0.75rem', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
+                        <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: '#0F172A', marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>
                             Create your Smart Campus Hub account
                         </h2>
                         <p style={{ color: '#475569', fontSize: '0.95rem', lineHeight: '1.6' }}>
@@ -178,65 +175,98 @@ const UserIdentityForm = () => {
                         position: 'relative'
                     }}>
                         {error && (
-                            <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', padding: '0.75rem 1rem', marginBottom: '1.25rem', color: '#DC2626', fontSize: '0.875rem', fontWeight: '500' }}>
+                            <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', color: '#DC2626', fontSize: '0.875rem' }}>
                                 ⚠️ {error}
                             </div>
                         )}
 
-                        <div style={{ display: 'grid', gap: '1rem' }}>
+                        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#374151', marginBottom: '0.4rem' }}>Full Name</label>
+                                <input
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                    placeholder="Your full name"
+                                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1.5px solid #E5E7EB', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', background: 'white' }}
+                                />
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#374151', marginBottom: '0.4rem' }}>Email Address</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    placeholder="you@campus.edu"
+                                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1.5px solid #E5E7EB', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', background: 'white' }}
+                                />
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#374151', marginBottom: '0.4rem' }}>Role</label>
+                                <select
+                                    value={role}
+                                    onChange={(e) => setRole(e.target.value)}
+                                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1.5px solid #E5E7EB', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', background: 'white' }}
+                                >
+                                    <option value="Staff">Staff</option>
+                                    <option value="User">User</option>
+                                    <option value="Technician">Technician</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#374151', marginBottom: '0.4rem' }}>Password</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    placeholder="••••••••"
+                                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1.5px solid #E5E7EB', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', background: 'white' }}
+                                />
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#374151', marginBottom: '0.4rem' }}>Confirm Password</label>
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    required
+                                    placeholder="••••••••"
+                                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1.5px solid #E5E7EB', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', background: 'white' }}
+                                />
+                            </div>
+
                             <button
-                                onClick={() => identify('Admin User', 'ADMIN')}
-                                className="p-btn p-btn-primary w-full"
+                                type="submit"
                                 style={{
-                                    fontSize: '0.95rem',
-                                    padding: '1rem',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: '0.25rem',
-                                    height: 'auto',
-                                    background: 'var(--primary)',
+                                    marginTop: '0.5rem',
+                                    padding: '0.875rem',
+                                    background: 'linear-gradient(135deg, #447794, #061222)',
                                     color: 'white',
                                     border: 'none',
                                     borderRadius: '12px',
-                                    cursor: 'pointer'
+                                    fontSize: '1rem',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    transition: 'opacity 0.2s'
                                 }}
+                                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                             >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                    <ShieldAlert size={18} />
-                                    <span>Administrator Portal</span>
-                                </div>
-                                <span style={{ fontSize: '0.7rem', fontWeight: '400', opacity: 0.8 }}>Access all tickets and management tools</span>
+                                Create Account
                             </button>
-
-                            <button
-                                onClick={() => identify('Student User', 'USER')}
-                                className="p-btn p-btn-secondary w-full"
-                                style={{
-                                    fontSize: '0.95rem',
-                                    padding: '1rem',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: '0.25rem',
-                                    height: 'auto',
-                                    borderColor: 'var(--primary)',
-                                    color: 'var(--primary)',
-                                    background: 'transparent',
-                                    border: '1px solid var(--primary)',
-                                    borderRadius: '12px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                    <UserIcon size={18} />
-                                    <span>Student / Staff User</span>
-                                </div>
-                                <span style={{ fontSize: '0.7rem', fontWeight: '400', color: 'var(--text-tertiary)' }}>Report incidents and track your requests</span>
-                            </button>
-                        </div>
+                        </form>
                     </div>
 
-                    <p style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '1.25rem' }}>
-                        Your details will be used to track your submitted tickets.
+                    <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#6B7280', marginTop: '1.25rem' }}>
+                        Already have an account?{' '}
+                        <a href="/login" style={{ color: '#447794', fontWeight: '600', textDecoration: 'none' }}>Sign in</a>
                     </p>
                 </div>
             </div>
