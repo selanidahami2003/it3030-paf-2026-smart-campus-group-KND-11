@@ -28,8 +28,6 @@ const UserIdentityForm = () => {
             setError('Passwords do not match');
             return;
         }
-        // In a real app, you would call a register endpoint.
-        // For now, we mock it via identify as before.
         identify(name, role.toUpperCase());
     };
 
@@ -44,7 +42,7 @@ const UserIdentityForm = () => {
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
-            
+
             {/* Left Side - Blue Banner */}
             <div style={{
                 flex: 1,
@@ -59,7 +57,7 @@ const UserIdentityForm = () => {
             }}>
                 {/* Background glow effects */}
                 <div style={{ position: 'absolute', top: '-10%', left: '-10%', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%)', borderRadius: '50%' }}></div>
-                
+
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '4rem' }}>
                         <div style={{ backgroundColor: 'white', borderRadius: '10px', padding: '4px', display: 'flex', width: '40px', height: '40px', overflow: 'hidden' }}>
@@ -74,11 +72,11 @@ const UserIdentityForm = () => {
                     <div style={{ fontSize: '0.75rem', fontWeight: '600', letterSpacing: '0.1em', opacity: 0.8, marginBottom: '1rem' }}>
                         UNIFIED CAMPUS EXPERIENCE
                     </div>
-                    
+
                     <h1 style={{ fontSize: '3rem', fontWeight: '700', lineHeight: '1.1', marginBottom: '1.5rem', maxWidth: '90%' }}>
                         Streamline your campus experience with integrated services.
                     </h1>
-                    
+
                     <p style={{ fontSize: '1.25rem', lineHeight: '1.6', color: '#E2E8F0', maxWidth: '85%', marginBottom: '3rem', fontWeight: '400' }}>
                         Manage bookings, support requests, and campus services through one secure platform.
                     </p>
@@ -89,12 +87,12 @@ const UserIdentityForm = () => {
                             { text: 'Support ticket tracking', icon: <Ticket size={18} />, path: '/tickets' },
                             { text: 'Smart notifications', icon: <Bell size={18} />, path: '/notifications' }
                         ].map((item, idx) => (
-                            <div 
-                                key={idx} 
+                            <div
+                                key={idx}
                                 onClick={() => handleCardClick(item.path)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleCardClick(item.path)}
                                 tabIndex={0}
-                                style={{ 
+                                style={{
                                     flex: '1 1 150px',
                                     background: 'rgba(255, 255, 255, 0.08)',
                                     backdropFilter: 'blur(12px)',
@@ -123,9 +121,9 @@ const UserIdentityForm = () => {
                                 onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.96)'}
                                 onMouseUp={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
                             >
-                                <div style={{ 
-                                    width: '32px', height: '32px', borderRadius: '10px', 
-                                    background: 'rgba(255, 255, 255, 0.15)', 
+                                <div style={{
+                                    width: '32px', height: '32px', borderRadius: '10px',
+                                    background: 'rgba(255, 255, 255, 0.15)',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     marginBottom: '0.25rem'
                                 }}>
@@ -137,7 +135,7 @@ const UserIdentityForm = () => {
                     </div>
                 </div>
 
-                {/* Footer info or minimal bottom text */}
+                {/* Footer */}
                 <div style={{ opacity: 0.6, fontSize: '0.85rem' }}>
                     © 2026 Smart Campus Hub. All rights reserved.
                 </div>
@@ -146,7 +144,7 @@ const UserIdentityForm = () => {
             {/* Right Side - Form */}
             <div style={{
                 flex: 1,
-                backgroundColor: '#F8FAFC', // Subtle off-white background
+                backgroundColor: '#F8FAFC',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -154,12 +152,11 @@ const UserIdentityForm = () => {
                 padding: '2rem'
             }}>
                 <div style={{ width: '100%', maxWidth: '440px' }}>
-                    
                     <div style={{ marginBottom: '2rem' }}>
                         <div style={{ fontSize: '0.75rem', fontWeight: '600', letterSpacing: '0.1em', color: '#6B7280', marginBottom: '0.5rem' }}>
                             GET STARTED
                         </div>
-                        <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: '#0F172A', marginBottom: '0.75rem', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
+                        <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: '#0F172A', marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>
                             Create your Smart Campus Hub account
                         </h2>
                         <p style={{ color: '#475569', fontSize: '0.95rem', lineHeight: '1.6' }}>
@@ -177,56 +174,101 @@ const UserIdentityForm = () => {
                         border: '1px solid rgba(255, 255, 255, 0.8)',
                         position: 'relative'
                     }}>
-                        ⚠️ {error}
+                        {error && (
+                            <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', color: '#DC2626', fontSize: '0.875rem' }}>
+                                ⚠️ {error}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#374151', marginBottom: '0.4rem' }}>Full Name</label>
+                                <input
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                    placeholder="Your full name"
+                                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1.5px solid #E5E7EB', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', background: 'white' }}
+                                />
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#374151', marginBottom: '0.4rem' }}>Email Address</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    placeholder="you@campus.edu"
+                                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1.5px solid #E5E7EB', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', background: 'white' }}
+                                />
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#374151', marginBottom: '0.4rem' }}>Role</label>
+                                <select
+                                    value={role}
+                                    onChange={(e) => setRole(e.target.value)}
+                                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1.5px solid #E5E7EB', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', background: 'white' }}
+                                >
+                                    <option value="Staff">Staff</option>
+                                    <option value="User">User</option>
+                                    <option value="Technician">Technician</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#374151', marginBottom: '0.4rem' }}>Password</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    placeholder="••••••••"
+                                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1.5px solid #E5E7EB', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', background: 'white' }}
+                                />
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#374151', marginBottom: '0.4rem' }}>Confirm Password</label>
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    required
+                                    placeholder="••••••••"
+                                    style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1.5px solid #E5E7EB', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', background: 'white' }}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                style={{
+                                    marginTop: '0.5rem',
+                                    padding: '0.875rem',
+                                    background: 'linear-gradient(135deg, #447794, #061222)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    fontSize: '1rem',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    transition: 'opacity 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                            >
+                                Create Account
+                            </button>
+                        </form>
                     </div>
-                )}
 
-                <div style={{ display: 'grid', gap: '1rem' }}>
-                    <button
-                        onClick={() => onIdentified({ name: 'Admin User', studentId: 'ADMIN001' })}
-                        className="p-btn p-btn-primary w-full"
-                        style={{ 
-                            fontSize: '1rem', 
-                            padding: '1.25rem', 
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            gap: '0.25rem',
-                            height: 'auto',
-                            background: 'var(--primary)'
-                        }}
-                    >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <ShieldAlert size={20} />
-                            <span>Administrator Portal</span>
-                        </div>
-                        <span style={{ fontSize: '0.75rem', fontWeight: '400', opacity: 0.8 }}>Access all tickets and management tools</span>
-                    </button>
-
-                    <button
-                        onClick={() => onIdentified({ name: 'Student User', studentId: 'ST67890' })}
-                        className="p-btn p-btn-secondary w-full"
-                        style={{ 
-                            fontSize: '1rem', 
-                            padding: '1.25rem', 
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            gap: '0.25rem',
-                            height: 'auto',
-                            borderColor: 'var(--primary)',
-                            color: 'var(--primary)'
-                        }}
-                    >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <UserIcon size={20} />
-                            <span>Student / Staff User</span>
-                        </div>
-                        <span style={{ fontSize: '0.75rem', fontWeight: '400', color: 'var(--text-tertiary)' }}>Report incidents and track your requests</span>
-                    </button>
+                    <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#6B7280', marginTop: '1.25rem' }}>
+                        Already have an account?{' '}
+                        <a href="/login" style={{ color: '#447794', fontWeight: '600', textDecoration: 'none' }}>Sign in</a>
+                    </p>
                 </div>
-
-                <p style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '1.25rem' }}>
-                    Your details will be used to track your submitted tickets.
-                </p>
             </div>
         </div>
     );
