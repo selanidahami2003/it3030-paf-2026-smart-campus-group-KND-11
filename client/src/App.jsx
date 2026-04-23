@@ -3,12 +3,14 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 
 import Navbar from './components/Navbar';
+import Home from './components/Home';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import Tickets from './components/Tickets';
 import UserIdentityForm from './components/UserIdentityForm';
 import MyBookings from './components/MyBookings';
 import CreateBooking from './components/CreateBooking';
+import AdminBookings from './components/AdminBookings';
 
 import './index.css';
 
@@ -38,13 +40,16 @@ function AppRoutes() {
         <Navbar />
         <main className="app-main">
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Navigate to="/home" replace />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/tickets" element={<Tickets />} />
             <Route path="/bookings/my" element={<MyBookings />} />
             <Route path="/bookings/new" element={<CreateBooking />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/bookings" element={<AdminBookings />} />
+            <Route path="/reporting" element={<div style={{padding: '2rem'}}>Reporting under construction</div>} />
+            <Route path="*" element={<Navigate to="/home" replace />} />
           </Routes>
         </main>
       </div>
