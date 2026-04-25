@@ -1,22 +1,63 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, AuthContext } from './context/AuthContext';
+
 import Navbar from './components/Navbar';
-import Home from './components/Home';
+import Dashboard from './components/Dashboard';
+import Login from './components/Login';
+import Tickets from './components/Tickets';
+import UserIdentityForm from './components/UserIdentityForm';
+
 import './index.css';
 
-function App() {
+function AppRoutes() {
+  const { user, loading, identify } = useContext(AuthContext);
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          fontSize: '1rem',
+          color: 'var(--text-secondary)',
+        }}
+      >
+        Loading...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <UserIdentityForm
+        onIdentified={({ name, studentId }) => identify(name, studentId)}
+      />
+    );
+  }
+
   return (
     <BrowserRouter>
-      <div className="app-container">
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="*" element={<Home />} />
-        </Routes>
-      </div>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/tickets" element={<Tickets />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
     </BrowserRouter>
   );
 }
 
-export default App;
+function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  );
+}
 
+export default App;
