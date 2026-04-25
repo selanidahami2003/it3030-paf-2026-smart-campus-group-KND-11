@@ -22,11 +22,6 @@ public class TicketSummaryDTO {
     public LocalDateTime createdAt;
     public LocalDateTime updatedAt;
 
-    // Attachment fields (included for the expanded detail view on the frontend)
-    public String attachment1;
-    public String attachment2;
-    public String attachment3;
-
     public TicketSummaryDTO(Ticket t) {
         this.id = t.getId();
         this.category = t.getCategory() != null ? t.getCategory().name() : null;
@@ -39,9 +34,5 @@ public class TicketSummaryDTO {
         this.hasAttachments = (t.getAttachment1() != null || t.getAttachment2() != null || t.getAttachment3() != null);
         this.createdAt = t.getCreatedAt();
         this.updatedAt = t.getUpdatedAt();
-        // Include attachments for the collapsed ticket — frontend shows them on expand
-        this.attachment1 = t.getAttachment1();
-        this.attachment2 = t.getAttachment2();
-        this.attachment3 = t.getAttachment3();
     }
 }

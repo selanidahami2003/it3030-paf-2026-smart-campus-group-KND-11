@@ -1,405 +1,232 @@
-import React, { useState, useEffect, useContext, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import TicketForm from './TicketForm';
+import TicketDetails from './TicketDetails';
 
-// ─── Skeleton loader for individual ticket cards ───────────────────────────────
-const TicketSkeleton = () => (
-    <div className="p-card ticket-skeleton" style={{ padding: '1.5rem', overflow: 'hidden' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <div className="skel skel-line" style={{ width: '45%', height: '1.1rem', borderRadius: '6px' }} />
-            <div className="skel skel-badge" style={{ width: '80px', height: '1.5rem', borderRadius: '20px' }} />
-        </div>
-        <div className="skel skel-line" style={{ width: '92%', height: '0.9rem', marginBottom: '0.5rem', borderRadius: '4px' }} />
-        <div className="skel skel-line" style={{ width: '70%', height: '0.9rem', marginBottom: '1rem', borderRadius: '4px' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <div className="skel skel-line" style={{ width: '30%', height: '0.8rem', borderRadius: '4px' }} />
-            <div className="skel skel-line" style={{ width: '35%', height: '0.8rem', borderRadius: '4px' }} />
-        </div>
-    </div>
-);
-
-// ─── Status badge colour map ───────────────────────────────────────────────────
-const STATUS_COLORS = {
-    OPEN:        { bg: '#EFF6FF', color: '#1D4ED8', border: '#BFDBFE' },
-    IN_PROGRESS: { bg: '#FFFBEB', color: '#B45309', border: '#FDE68A' },
-    RESOLVED:    { bg: '#F0FDF4', color: '#166534', border: '#BBF7D0' },
-    CLOSED:      { bg: '#F8FAFC', color: '#475569', border: '#E2E8F0' },
-};
-
-const PRIORITY_COLORS = {
-    URGENT: '#DC2626',
-    HIGH:   '#EA580C',
-    MEDIUM: '#D97706',
-    LOW:    '#16A34A',
-};
-
-// ─── Main component ────────────────────────────────────────────────────────────
 const Tickets = () => {
     const { user } = useContext(AuthContext);
     const [tickets, setTickets] = useState([]);
+    const [filteredTickets, setFilteredTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isFormOpen, setIsFormOpen] = useState(false);
-    const [comments, setComments] = useState({});
-    const [newComment, setNewComment] = useState('');
-    const [activeTicketId, setActiveTicketId] = useState(null);
+    const [selectedTicketId, setSelectedTicketId] = useState(null);
+    
+    // Filters
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState('ALL');
+    const [priorityFilter, setPriorityFilter] = useState('ALL');
+    const [categoryFilter, setCategoryFilter] = useState('ALL');
 
-    // Cache ref — avoids duplicate fetches on strict-mode double-mount
-    const cacheRef = useRef(null);
-    const fetchingRef = useRef(false);
-
-    // ── fetchTickets: stable reference with useCallback ──────────────────────
-    const fetchTickets = useCallback(async (force = false) => {
-        if (fetchingRef.current) return; // prevent concurrent fetches
-        // Return cached data immediately while revalidating in background
-        if (cacheRef.current && !force) {
-            setTickets(cacheRef.current);
-            setLoading(false);
-        }
-        fetchingRef.current = true;
+    const fetchTickets = async () => {
         try {
-            const url = user.role === 'ADMIN' || user.role === 'TECHNICIAN'
-                ? '/tickets'
-                : '/tickets/my';
+            setLoading(true);
+            const url = user.role === 'ADMIN' || user.role === 'TECHNICIAN' ? '/tickets' : '/tickets/my';
             const res = await api.get(url);
-            cacheRef.current = res.data;
             setTickets(res.data);
+            setFilteredTickets(res.data);
         } catch (err) {
-            console.error('Failed to fetch tickets:', err);
+            console.error(err);
         } finally {
             setLoading(false);
-            fetchingRef.current = false;
         }
-    }, [user?.role]); // only re-create if role changes
+    };
 
-    // ── Fetch immediately on mount ────────────────────────────────────────────
     useEffect(() => {
-        fetchTickets();
-    }, [fetchTickets]);
-
-    // ── Status update ─────────────────────────────────────────────────────────
-    const handleStatus = useCallback(async (id, status) => {
-        // Optimistic UI update
-        setTickets(prev => prev.map(t => t.id === id ? { ...t, status } : t));
-        try {
-            await api.put(`/tickets/${id}/status`, { status, assigneeId: user.id });
-        } catch {
-            alert('Status update failed');
-            fetchTickets(true); // revert by refetching
+        if (user) {
+            fetchTickets();
         }
-    }, [user?.id, fetchTickets]);
+    }, [user]);
 
-    // ── Delete ticket ─────────────────────────────────────────────────────────
-    const handleDelete = useCallback(async (id) => {
-        if (!window.confirm('Delete this ticket? This cannot be undone.')) return;
-        // Optimistic removal
-        setTickets(prev => prev.filter(t => t.id !== id));
-        cacheRef.current = cacheRef.current?.filter(t => t.id !== id) ?? null;
-        setActiveTicketId(prev => prev === id ? null : prev);
+    useEffect(() => {
+        let result = tickets;
+
+        if (searchQuery) {
+            result = result.filter(t => 
+                t.id.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                t.description.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        if (statusFilter !== 'ALL') {
+            result = result.filter(t => t.status === statusFilter);
+        }
+
+        if (priorityFilter !== 'ALL') {
+            result = result.filter(t => t.priority === priorityFilter);
+        }
+
+        if (categoryFilter !== 'ALL') {
+            result = result.filter(t => t.category === categoryFilter);
+        }
+
+        setFilteredTickets(result);
+    }, [searchQuery, statusFilter, priorityFilter, categoryFilter, tickets]);
+
+    const handleDeleteTicket = async (id) => {
+        if (!window.confirm('Are you sure you want to permanently delete this incident report?')) return;
         try {
             await api.delete(`/tickets/${id}`);
-        } catch {
-            alert('Failed to delete ticket');
-            fetchTickets(true);
+            fetchTickets();
+        } catch (err) {
+            console.error("Failed to delete ticket", err);
+            alert("Could not delete ticket. Please try again.");
         }
-    }, [fetchTickets]);
+    };
 
-    // ── Toggle expand and lazy-load comments ──────────────────────────────────
-    const toggleDetails = useCallback(async (id) => {
-        if (activeTicketId === id) {
-            setActiveTicketId(null);
-            return;
+    const getStatusBadgeClass = (status) => {
+        switch (status) {
+            case 'OPEN': return 'badge-status-open';
+            case 'IN_PROGRESS': return 'badge-status-progress';
+            case 'RESOLVED': return 'badge-status-resolved';
+            case 'CLOSED': return 'badge-status-closed';
+            case 'REJECTED': return 'badge-status-rejected';
+            default: return '';
         }
-        setActiveTicketId(id);
-        // Only fetch comments if not already in cache
-        if (!comments[id]) {
-            try {
-                const res = await api.get(`/tickets/${id}/comments`);
-                setComments(prev => ({ ...prev, [id]: res.data }));
-            } catch {
-                setComments(prev => ({ ...prev, [id]: [] }));
-            }
-        }
-    }, [activeTicketId, comments]);
+    };
 
-    // ── Post comment ──────────────────────────────────────────────────────────
-    const handleComment = useCallback(async (id) => {
-        if (!newComment.trim()) return;
-        const content = newComment;
-        setNewComment('');
-        try {
-            await api.post(`/tickets/${id}/comments`, { content });
-            const res = await api.get(`/tickets/${id}/comments`);
-            setComments(prev => ({ ...prev, [id]: res.data }));
-        } catch {
-            alert('Failed to post comment');
+    const getPriorityBadgeClass = (priority) => {
+        switch (priority) {
+            case 'LOW': return 'badge-priority-low';
+            case 'MEDIUM': return 'badge-priority-medium';
+            case 'HIGH': return 'badge-priority-high';
+            case 'URGENT': return 'badge-priority-urgent';
+            default: return '';
         }
-    }, [newComment]);
+    };
 
-    // ─────────────────────────────────────────────────────────────────────────
-    const isTech  = user?.role === 'TECHNICIAN';
-    const isAdmin = user?.role === 'ADMIN';
-    const canReport = !user || user.role === 'USER';
+    if (!user) return <div className="p-card text-center py-12">Please login to view tickets.</div>;
 
     return (
-        <div>
-            {/* ── Header ── */}
-            <div className="flex justify-between items-center mb-6">
+        <div className="fade-in">
+            <div className="flex justify-between items-end mb-8 flex-wrap gap-4">
                 <div>
-                    <h2>Service Desk</h2>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-                        Report incidents or track existing support requests.
-                    </p>
+                    <h2 style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>Service Desk</h2>
+                    <p className="text-secondary">Track and manage campus-wide incidents and support requests.</p>
                 </div>
-                {canReport && (
-                    <button className="p-btn p-btn-primary" onClick={() => setIsFormOpen(true)}>
-                        Report Incident
-                    </button>
-                )}
+                <button className="p-btn p-btn-primary" onClick={() => setIsFormOpen(true)}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '0.5rem' }}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Report Incident
+                </button>
             </div>
 
-            <TicketForm
-                isOpen={isFormOpen}
-                onClose={() => setIsFormOpen(false)}
-                onSuccess={() => fetchTickets(true)}
-            />
-
-            {/* ── Skeleton loader while first fetch is in flight ── */}
-            {loading ? (
-                <div style={{ display: 'grid', gap: '1rem' }}>
-                    {[1, 2, 3].map(n => <TicketSkeleton key={n} />)}
+            <div className="p-card mb-8" style={{ padding: '1.25rem' }}>
+                <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                    <div className="flex flex-col">
+                        <label className="text-xs font-bold text-secondary uppercase mb-2">Search</label>
+                        <input type="text" className="p-input" style={{ padding: '0.5rem 1rem' }} placeholder="Ticket ID or Keyword..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                    </div>
+                    <div className="flex flex-col">
+                        <label className="text-xs font-bold text-secondary uppercase mb-2">Status</label>
+                        <select className="p-input" style={{ padding: '0.5rem 1rem' }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                            <option value="ALL">All Statuses</option>
+                            <option value="OPEN">Open</option>
+                            <option value="IN_PROGRESS">In Progress</option>
+                            <option value="RESOLVED">Resolved</option>
+                            <option value="CLOSED">Closed</option>
+                            <option value="REJECTED">Rejected</option>
+                        </select>
+                    </div>
+                    <div className="flex flex-col">
+                        <label className="text-xs font-bold text-secondary uppercase mb-2">Priority</label>
+                        <select className="p-input" style={{ padding: '0.5rem 1rem' }} value={priorityFilter} onChange={e => setPriorityFilter(e.target.value)}>
+                            <option value="ALL">All Priorities</option>
+                            <option value="LOW">Low</option>
+                            <option value="MEDIUM">Medium</option>
+                            <option value="HIGH">High</option>
+                            <option value="URGENT">Urgent</option>
+                        </select>
+                    </div>
+                    <div className="flex flex-col">
+                        <label className="text-xs font-bold text-secondary uppercase mb-2">Category</label>
+                        <select className="p-input" style={{ padding: '0.5rem 1rem' }} value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}>
+                            <option value="ALL">All Categories</option>
+                            <option value="HARDWARE">Hardware</option>
+                            <option value="SOFTWARE">Software</option>
+                            <option value="NETWORK">Network</option>
+                            <option value="FACILITY">Facility</option>
+                        </select>
+                    </div>
                 </div>
-            ) : tickets.length === 0 ? (
-                <div className="p-card text-center" style={{ padding: '3rem', color: 'var(--text-secondary)' }}>
-                    <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🎫</div>
-                    <p style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
-                        No tickets yet
-                    </p>
-                    <p style={{ fontSize: '0.875rem' }}>Submit an incident report to get started.</p>
-                </div>
-            ) : (
-                <div style={{ display: 'grid', gap: '1rem' }}>
-                    {tickets.map(t => {
-                        const statusStyle = STATUS_COLORS[t.status] || STATUS_COLORS.OPEN;
-                        const isExpanded  = activeTicketId === t.id;
-                        const priorityColor = PRIORITY_COLORS[t.priority] || 'var(--text-primary)';
+            </div>
 
-                        return (
-                            <div key={t.id} className="p-card ticket-card" style={{ padding: '0', overflow: 'hidden' }}>
-                                {/* ── Card header (clickable) ── */}
-                                <div
-                                    style={{
-                                        padding: '1.25rem 1.5rem',
-                                        cursor: 'pointer',
-                                        transition: 'background-color 0.15s ease',
-                                    }}
-                                    onClick={() => toggleDetails(t.id)}
-                                    onMouseOver={e  => e.currentTarget.style.backgroundColor = 'var(--surface-color-light)'}
-                                    onMouseOut={e   => e.currentTarget.style.backgroundColor = 'transparent'}
-                                >
-                                    <div className="flex justify-between items-center mb-2">
-                                        <h3 style={{ fontSize: '1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <span style={{
-                                                display: 'inline-block', width: '8px', height: '8px',
-                                                borderRadius: '50%', backgroundColor: priorityColor, flexShrink: 0
-                                            }} />
-                                            {t.category
-                                                ? t.category.charAt(0) + t.category.slice(1).toLowerCase() + ' Issue'
-                                                : 'Issue'}
-                                        </h3>
+            <TicketForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} onSuccess={fetchTickets} />
+            {selectedTicketId && <TicketDetails ticketId={selectedTicketId} onClose={() => setSelectedTicketId(null)} onUpdate={fetchTickets} />}
 
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            {/* Status badge */}
-                                            <span style={{
-                                                fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.04em',
-                                                padding: '3px 10px', borderRadius: '20px',
-                                                backgroundColor: statusStyle.bg,
-                                                color: statusStyle.color,
-                                                border: `1px solid ${statusStyle.border}`,
-                                                textTransform: 'uppercase',
-                                            }}>
-                                                {t.status?.replace('_', ' ')}
-                                            </span>
-
-                                            {/* Delete button */}
-                                            <button
-                                                onClick={e => { e.stopPropagation(); handleDelete(t.id); }}
-                                                title="Delete ticket"
-                                                style={{
-                                                    background: 'none', border: 'none', cursor: 'pointer',
-                                                    color: 'var(--danger, #e53e3e)', fontSize: '0.9rem',
-                                                    padding: '4px 6px', borderRadius: '6px',
-                                                    transition: 'background 0.15s',
-                                                    lineHeight: 1,
-                                                }}
-                                                onMouseOver={e => e.currentTarget.style.background = 'rgba(229,62,62,0.1)'}
-                                                onMouseOut={e  => e.currentTarget.style.background = 'none'}
-                                            >
-                                                🗑️
-                                            </button>
-
-                                            {/* Expand chevron */}
-                                            <span style={{
-                                                fontSize: '0.8rem', color: 'var(--text-secondary)',
-                                                transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                                                transition: 'transform 0.25s ease', display: 'inline-block'
-                                            }}>▼</span>
-                                        </div>
+            <div className="grid" style={{ gap: '1rem' }}>
+                {loading ? (
+                    [1, 2, 3].map(i => <div key={i} className="skeleton skeleton-card"></div>)
+                ) : filteredTickets.length === 0 ? (
+                    <div className="p-card text-center py-12">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" style={{ color: 'var(--text-secondary)', marginBottom: '1rem', opacity: 0.5 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <h3 className="text-secondary">No tickets found matching your filters.</h3>
+                    </div>
+                ) : (
+                    filteredTickets.map(t => (
+                        <div key={t.id} className={`p-card ticket-card priority-${t.priority.toLowerCase()}`} 
+                             style={{ padding: '1.25rem', cursor: 'pointer' }}
+                             onClick={() => setSelectedTicketId(t.id)}>
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="flex flex-col gap-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-xs font-bold text-secondary">#{t.id}</span>
+                                        <span className="text-xs text-secondary">•</span>
+                                        <span className="text-xs text-secondary font-bold uppercase">{t.category}</span>
                                     </div>
-
-                                    <p style={{ color: 'var(--text-secondary)', marginBottom: '0.75rem', fontSize: '0.9rem', lineHeight: 1.5 }}>
-                                        {t.description?.substring(0, 120)}{(t.description?.length || 0) > 120 ? '…' : ''}
-                                    </p>
-
-                                    <div className="flex justify-between" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                                        <span>
-                                            Priority:{' '}
-                                            <strong style={{ color: priorityColor }}>{t.priority}</strong>
-                                        </span>
-                                        <span>
-                                            Reported by:{' '}
-                                            <strong style={{ color: 'var(--text-primary)' }}>
-                                                {t.reporterName || t.creatorName || 'Unknown'}
-                                            </strong>
-                                        </span>
+                                    <h3 style={{ fontSize: '1.125rem' }} className="truncate">{t.description.substring(0, 80)}{t.description.length > 80 ? '...' : ''}</h3>
+                                </div>
+                                <div className="flex flex-col items-end gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className={`badge ${getStatusBadgeClass(t.status)}`}>{t.status}</span>
+                                        <span className={`badge ${getPriorityBadgeClass(t.priority)}`}>{t.priority}</span>
+                                        {(user.role === 'ADMIN' || t.creator?.id === user.id) && (
+                                            <button 
+                                                className="p-btn p-btn-secondary" 
+                                                style={{ padding: '0', width: '28px', height: '28px', color: 'var(--danger)', border: 'none', background: 'rgba(239, 68, 68, 0.05)' }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteTicket(t.id);
+                                                }}
+                                            >
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
-
-                                {/* ── Expanded detail panel ── */}
-                                {isExpanded && (
-                                    <div style={{
-                                        borderTop: '1px solid var(--border-color)',
-                                        padding: '1.5rem',
-                                        background: 'var(--surface-color-light)',
-                                        animation: 'fadeSlideIn 0.2s ease',
-                                    }}>
-                                        {/* Full description */}
-                                        <div className="mb-4">
-                                            <strong style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                                Full Description
-                                            </strong>
-                                            <p className="mt-1" style={{ fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.6 }}>
-                                                {t.description}
-                                            </p>
-                                        </div>
-
-                                        {/* Evidence Photos */}
-                                        <div className="mb-4">
-                                            <strong style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '0.75rem' }}>
-                                                Evidence Photos
-                                            </strong>
-                                            {(t.attachment1 || t.attachment2 || t.attachment3) ? (
-                                                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                                                    {[t.attachment1, t.attachment2, t.attachment3].filter(Boolean).map((src, idx) => (
-                                                        <div
-                                                            key={idx}
-                                                            style={{
-                                                                width: '130px', height: '130px',
-                                                                borderRadius: '12px', overflow: 'hidden',
-                                                                border: '2px solid var(--border-color)',
-                                                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                                                cursor: 'pointer',
-                                                                transition: 'transform 0.2s, box-shadow 0.2s',
-                                                                flexShrink: 0
-                                                            }}
-                                                            onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.2)'; }}
-                                                            onMouseOut={e  => { e.currentTarget.style.transform = 'scale(1)';   e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)'; }}
-                                                            onClick={() => {
-                                                                const w = window.open();
-                                                                w.document.write(`<img src="${src}" style="max-width:100%;max-height:100vh">`);
-                                                            }}
-                                                        >
-                                                            <img
-                                                                src={src}
-                                                                alt={`Evidence ${idx + 1}`}
-                                                                loading="lazy"
-                                                                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                                                            />
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-                                                    No evidence provided.
-                                                </p>
-                                            )}
-                                        </div>
-
-                                        {/* Technician action buttons */}
-                                        {isTech && t.status !== 'CLOSED' && t.status !== 'RESOLVED' && (
-                                            <div className="flex gap-2 mb-6">
-                                                <button
-                                                    className="p-btn p-btn-secondary"
-                                                    onClick={() => handleStatus(t.id, 'IN_PROGRESS')}
-                                                >
-                                                    Mark In Progress
-                                                </button>
-                                                <button
-                                                    className="p-btn p-btn-secondary"
-                                                    onClick={() => handleStatus(t.id, 'RESOLVED')}
-                                                    style={{ color: 'var(--success)', borderColor: 'var(--success)' }}
-                                                >
-                                                    Resolve
-                                                </button>
-                                            </div>
-                                        )}
-
-                                        {/* Comments */}
-                                        <div className="mt-4">
-                                            <h4 className="mb-2 text-sm" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 600 }}>
-                                                Updates &amp; Comments
-                                            </h4>
-                                            <div style={{
-                                                maxHeight: '200px', overflowY: 'auto',
-                                                margin: '1rem 0', background: 'var(--bg-color)',
-                                                padding: '1rem', borderRadius: 'var(--radius-md)'
-                                            }}>
-                                                {!comments[t.id] ? (
-                                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
-                                                        Loading comments…
-                                                    </p>
-                                                ) : comments[t.id].length === 0 ? (
-                                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
-                                                        No comments yet. Add one below!
-                                                    </p>
-                                                ) : comments[t.id].map(c => (
-                                                    <div key={c.id} style={{ marginBottom: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }}>
-                                                        <div className="flex justify-between" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
-                                                            <span style={{ fontWeight: 600, color: c.author?.email === user.email ? 'var(--primary)' : 'var(--text-primary)' }}>
-                                                                {c.author?.name}
-                                                            </span>
-                                                            <span>{new Date(c.createdAt).toLocaleString()}</span>
-                                                        </div>
-                                                        <p style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>{c.content}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-
-                                            {!isAdmin && (
-                                                <div className="flex gap-2">
-                                                    <input
-                                                        type="text"
-                                                        className="p-input"
-                                                        value={newComment}
-                                                        onChange={e => setNewComment(e.target.value)}
-                                                        placeholder="Add an update or ask a question…"
-                                                        onKeyDown={e => e.key === 'Enter' && handleComment(t.id)}
-                                                    />
-                                                    <button className="p-btn p-btn-primary" onClick={() => handleComment(t.id)}>
-                                                        Post
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
                             </div>
-                        );
-                    })}
-                </div>
-            )}
+                            
+                            <div className="flex justify-between items-center mt-6 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-1 text-xs text-secondary">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                        <span>{t.creator?.name || 'Unknown'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1 text-xs text-secondary">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                        <span>{new Date(t.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    {(t.attachment1 || t.attachment2 || t.attachment3) && (
+                                        <div className="flex items-center gap-1 text-xs text-secondary" title="Attachments">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                            <span>{[t.attachment1, t.attachment2, t.attachment3].filter(Boolean).length}</span>
+                                        </div>
+                                    )}
+                                    {/* Since comment count isn't in the model, I'll show a placeholder or skip if not available */}
+                                    <div className="flex items-center gap-1 text-xs text-secondary" title="Comments">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                        <span>Click to view</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
         </div>
     );
 };
 
 export default Tickets;
+

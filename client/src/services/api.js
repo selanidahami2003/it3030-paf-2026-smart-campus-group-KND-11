@@ -10,6 +10,17 @@ api.interceptors.request.use(
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
         }
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                if (user && user.id) {
+                    config.headers['X-User-Id'] = user.id;
+                }
+            } catch (e) {
+                console.error("Failed to parse user from local storage", e);
+            }
+        }
         return config;
     },
     (error) => {
